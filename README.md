@@ -104,8 +104,8 @@ We selected MongoDB for the HappyNest application for several compelling reasons
 ### Prerequisites:
 - Clone and Navigate to the repository:
   ```bash
-  git clone <https://github.com/moeez-tariq/HappyNest>
-  cd <HappyNest>
+  git clone https://github.com/moeez-tariq/HappyNest
+  cd HappyNest
   ```
 - Set up the environment and Store your MongoDB URI in an `.env` file with the following content:
   ```
@@ -120,7 +120,7 @@ We selected MongoDB for the HappyNest application for several compelling reasons
 ### Running the Application:
 - Run the main program:
   ```bash
-  python <db_sample>.py
+  python db_sample.py
   ```
 - Follow the menu options to:
   - Add users, good deeds, news articles, and replies.
