@@ -1,16 +1,15 @@
-# Final Project: Project in Programming and Data Science
+# HappyNest: Where Good Deeds Take Flight!
 
-Our Schema:
-![mongo_schema](https://github.com/user-attachments/assets/a1b17148-6744-4d40-97aa-49692ad5f994)
-
-
-# HappyNest Application
+# HappyNest Database
 
 This is a MongoDB-based Python application using **PyMongo** for interacting with the following collections:
 - `Users`
 - `GoodDeeds`
 - `News`
 - `Replies`
+
+Our Schema:
+![mongo_schema](https://github.com/user-attachments/assets/a1b17148-6744-4d40-97aa-49692ad5f994)
 
 ## Why We Chose MongoDB Over SQL
 
