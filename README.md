@@ -109,7 +109,7 @@ We selected MongoDB for the HappyNest application for several compelling reasons
   ```
 - Set up the environment and Store your MongoDB URI in an `.env` file with the following content:
   ```
-  MONGODB_URI=mongodb+srv://<your_mongo_uri>
+  MONGODB_URI=<your_mongo_uri>
   ```
 
 - Install required Python libraries:
