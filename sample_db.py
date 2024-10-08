@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import pymongo
+import re
 from bson.objectid import ObjectId
 from datetime import datetime
 
@@ -29,6 +30,12 @@ except pymongo.errors.ConnectionFailure as e:
 def add_user():
     name = input("Enter user name: ")
     email = input("Enter email: ")
+    # Validate email format using regex
+        # Validate email format
+    email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if not re.match(email_pattern, email):
+        print("Error: Invalid email format.")
+        return
     city = input("Enter city: ")
     state = input("Enter state: ")
     country = input("Enter country: ")
