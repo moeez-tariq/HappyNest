@@ -134,8 +134,7 @@ def add_news():
         },
         "sentiment": "positive",
         "published_at": datetime.utcnow(),
-        "source": input("Enter news source: "),
-        "tags": input("Enter tags (comma-separated): ").split(",") # Remove it later
+        "source": input("Enter news source: ")
     }
 
     try:
@@ -245,7 +244,7 @@ def update_document(collection):
     valid_fields = {
         "users": ['name', 'email', 'location', 'streak', 'mood', 'created_at'],
         "good_deeds": ['description', 'user_id', 'location', 'completed_at', 'streak_continued', 'replies'],
-        "news": ['title', 'content', 'location', 'sentiment', 'published_at', 'source', 'tags'],
+        "news": ['title', 'content', 'location', 'sentiment', 'published_at', 'source'],
         "replies": ['deed_id', 'user_id', 'content', 'created_at']
     }
 
