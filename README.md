@@ -1,6 +1,6 @@
 # HappyNest: Where Good Deeds Take Flight!
 
-## HappyNest Database
+## Our Database
 
 This is a MongoDB-based Python application using **PyMongo** for interacting with the following collections:
 - `Users`
