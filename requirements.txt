@@ -1,6 +1,6 @@
 python-dotenv
 pymongo
-bson
 fastapi
 pydantic
+pydantic[email]
 uvicorn
