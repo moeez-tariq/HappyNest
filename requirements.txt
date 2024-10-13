@@ -1,3 +1,6 @@
 python-dotenv
 pymongo
 bson
+fastapi
+pydantic
+uvicorn
