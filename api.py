@@ -47,7 +47,7 @@ class User(BaseModel):
     name: str
     email: EmailStr
     password: str  # Will need to be hashed later
-    location: Location
+    location: Optional[Location]
     streak: Optional[int] = 0
     mood: Optional[str]
     created_at: Optional[datetime] = datetime.now()
@@ -56,7 +56,7 @@ class NewsArticle(BaseModel):
     id: Optional[str] = None # Add this so id displays in response
     title: str
     content: str
-    location: Location
+    location: Optional[Location]
     sentiment: str
     published_at: Optional[datetime] = datetime.now()
     source: Optional[str]
@@ -65,7 +65,7 @@ class GoodDeed(BaseModel):
     id: Optional[str] = None # Add this so id displays in response
     user_id: str  # Assumes this will be ObjectId in the database, but str here
     title: Optional[str]
-    location: Location
+    location: Optional[Location]
     description: str
     completed_at: Optional[datetime] = datetime.now()
     streak_continued: Optional[bool] = False

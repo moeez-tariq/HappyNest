@@ -26,63 +26,17 @@ except pymongo.errors.ConnectionFailure as e:
     print(f"Could not connect to MongoDB: {e}")
     exit(1)
 
-# Add a new user with validation for required fields and default values
-def add_user():
-    name = input("Enter user name: ")
-    email = input("Enter email: ")
-    # Validate email format using regex
-        # Validate email format
-    email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-    if not re.match(email_pattern, email):
-        print("Error: Invalid email format.")
-        return
-    city = input("Enter city: ")
-    state = input("Enter state: ")
-    country = input("Enter country: ")
-    password = input("Enter password: ")
-
-    # Ensure none of the required fields are empty
-    if not name or not email or not city or not state or not country:
-        print("Error: All fields (name, email, city, state, country) are required.")
-        return
-
-    # Set default values for optional fields
-    streak = input("Enter streak count (leave blank for 0): ")
-    streak = int(streak) if streak else 0  # Default streak to 0 if left blank
-    mood = input("Enter mood: ")
-
-    user = {
-        "name": name,
-        "email": email,
-        "password": password, # Has to hashed 
-        "location": {
-            "city": city,
-            "state": state,
-            "country": country,
-            "coordinates": {
-                "latitude": float(input("Enter latitude: ")),
-                "longitude": float(input("Enter longitude: "))
-            }
-        },
-        "streak": streak,
-        "mood": mood,
-        "created_at": datetime.utcnow()
-    }
-
-    try:
-        result = users.insert_one(user)
-        print(f"User added with ID: {result.inserted_id}")
-    except pymongo.errors.PyMongoError as e:
-        print(f"An error occurred while adding the user: {e}")
-
-
-# Add a good deed with validation for required fields
 def add_good_deed():
     user_id = input("Enter user ID: ")
     title = input("Enter good deed title: ")
     city = input("Enter city: ")
     state = input("Enter state: ")
     country = input("Enter country: ")
+    
+    # Prompt for coordinates (latitude and longitude)
+    latitude = float(input("Enter latitude: "))
+    longitude = float(input("Enter longitude: "))
+
     description = input("Enter good deed description: ")
 
     # Ensure required fields are not empty
@@ -96,7 +50,8 @@ def add_good_deed():
         "location": {
             "city": city,
             "state": state,
-            "country": country
+            "country": country,
+            "coordinates": {"latitude": latitude, "longitude": longitude}
         },
         "description": description,
         "completed_at": datetime.utcnow(),
@@ -111,6 +66,123 @@ def add_good_deed():
         print(f"An error occurred while adding the good deed: {e}")
 
 
+# # Add a new user with validation for required fields and default values
+# def add_user():
+#     name = input("Enter user name: ")
+#     email = input("Enter email: ")
+#     # Validate email format using regex
+#         # Validate email format
+#     email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+#     if not re.match(email_pattern, email):
+#         print("Error: Invalid email format.")
+#         return
+#     city = input("Enter city: ")
+#     state = input("Enter state: ")
+#     country = input("Enter country: ")
+#     password = input("Enter password: ")
+
+#     # Ensure none of the required fields are empty
+#     if not name or not email or not city or not state or not country:
+#         print("Error: All fields (name, email, city, state, country) are required.")
+#         return
+
+#     # Set default values for optional fields
+#     streak = input("Enter streak count (leave blank for 0): ")
+#     streak = int(streak) if streak else 0  # Default streak to 0 if left blank
+#     mood = input("Enter mood: ")
+
+#     user = {
+#         "name": name,
+#         "email": email,
+#         "password": password, # Has to hashed 
+#         "location": {
+#             "city": city,
+#             "state": state,
+#             "country": country,
+#             "coordinates": {
+#                 "latitude": float(input("Enter latitude: ")),
+#                 "longitude": float(input("Enter longitude: "))
+#             }
+#         },
+#         "streak": streak,
+#         "mood": mood,
+#         "created_at": datetime.utcnow()
+#     }
+
+#     try:
+#         result = users.insert_one(user)
+#         print(f"User added with ID: {result.inserted_id}")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding the user: {e}")
+
+
+# # Add a good deed with validation for required fields
+# def add_good_deed():
+#     user_id = input("Enter user ID: ")
+#     title = input("Enter good deed title: ")
+#     city = input("Enter city: ")
+#     state = input("Enter state: ")
+#     country = input("Enter country: ")
+#     description = input("Enter good deed description: ")
+
+#     # Ensure required fields are not empty
+#     if not user_id or not description:
+#         print("Error: Both user ID and description are required.")
+#         return
+
+#     good_deed = {
+#         "user_id": user_id,
+#         "title": title,
+#         "location": {
+#             "city": city,
+#             "state": state,
+#             "country": country
+#         },
+#         "description": description,
+#         "completed_at": datetime.utcnow(),
+#         "streak_continued": bool(input("Streak continued (True/False): ")),
+#         "replies": []
+#     }
+
+#     try:
+#         result = good_deeds.insert_one(good_deed)
+#         print(f"Good deed added with ID: {result.inserted_id}")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding the good deed: {e}")
+
+
+# # Add a news article with validation for required fields
+# def add_news():
+#     title = input("Enter news title: ")
+#     content = input("Enter news content: ")
+#     city = input("Enter city: ")
+#     state = input("Enter state: ")
+#     country = input("Enter country: ")
+
+#     # Ensure required fields are not empty
+#     if not title or not content or not city or not state or not country:
+#         print("Error: All fields (title, content, city, state, country) are required.")
+#         return
+
+#     news_article = {
+#         "title": title,
+#         "content": content,
+#         "location": {
+#             "city": city,
+#             "state": state,
+#             "country": country
+#         },
+#         "sentiment": "positive",
+#         "published_at": datetime.utcnow(),
+#         "source": input("Enter news source: ")
+#     }
+
+#     try:
+#         result = news.insert_one(news_article)
+#         print(f"News article added with ID: {result.inserted_id}")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding the news article: {e}")
+
 # Add a news article with validation for required fields
 def add_news():
     title = input("Enter news title: ")
@@ -124,13 +196,34 @@ def add_news():
         print("Error: All fields (title, content, city, state, country) are required.")
         return
 
+    # Ask user for coordinates
+    latitude = input("Enter latitude (e.g., 40.7128): ")
+    longitude = input("Enter longitude (e.g., -74.0060): ")
+
+    # Ensure coordinates are not empty
+    if not latitude or not longitude:
+        print("Error: Both latitude and longitude are required.")
+        return
+    
+     # Convert coordinates to floats and ensure they are valid
+    try:
+        latitude = float(latitude)
+        longitude = float(longitude)
+    except ValueError:
+        print("Error: Latitude and longitude must be valid numbers.")
+        return
+
     news_article = {
         "title": title,
         "content": content,
         "location": {
             "city": city,
             "state": state,
-            "country": country
+            "country": country,
+            "coordinates": {
+                "latitude": latitude,    
+                "longitude": longitude
+            }
         },
         "sentiment": "positive",
         "published_at": datetime.utcnow(),
