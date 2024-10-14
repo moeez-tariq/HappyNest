@@ -534,8 +534,177 @@ def main():
     client.close()
     print("Goodbye!")
 
+# def add_sample_users():
+#     """Function to insert sample users into the MongoDB collection."""
+#     users_sample = [
+#         {"name": "Alice Johnson", "email": "alice.j@example.com", "password": "hashed_password", 
+#          "location": {"city": "New York", "state": "NY", "country": "USA", 
+#                       "coordinates": {"latitude": 40.7128, "longitude": -74.0060}}, 
+#          "streak": 5, "mood": "Happy", "created_at": datetime.utcnow()},
+#         {"name": "Bob Smith", "email": "bob.s@example.com", "password": "hashed_password", 
+#          "location": {"city": "Los Angeles", "state": "CA", "country": "USA", 
+#                       "coordinates": {"latitude": 34.0522, "longitude": -118.2437}}, 
+#          "streak": 2, "mood": "Excited", "created_at": datetime.utcnow()},
+#         {"name": "Carlos Martinez", "email": "carlos.m@example.com", "password": "hashed_password", 
+#          "location": {"city": "Miami", "state": "FL", "country": "USA", 
+#                       "coordinates": {"latitude": 25.7617, "longitude": -80.1918}}, 
+#          "streak": 8, "mood": "Cheerful", "created_at": datetime.utcnow()},
+#         {"name": "Diana Cheng", "email": "diana.c@example.com", "password": "hashed_password", 
+#          "location": {"city": "San Francisco", "state": "CA", "country": "USA", 
+#                       "coordinates": {"latitude": 37.7749, "longitude": -122.4194}}, 
+#          "streak": 3, "mood": "Motivated", "created_at": datetime.utcnow()},
+#         {"name": "Edward King", "email": "edward.k@example.com", "password": "hashed_password", 
+#          "location": {"city": "Chicago", "state": "IL", "country": "USA", 
+#                       "coordinates": {"latitude": 41.8781, "longitude": -87.6298}}, 
+#          "streak": 10, "mood": "Grateful", "created_at": datetime.utcnow()},
+#         {"name": "Fiona Davis", "email": "fiona.d@example.com", "password": "hashed_password", 
+#          "location": {"city": "Boston", "state": "MA", "country": "USA", 
+#                       "coordinates": {"latitude": 42.3601, "longitude": -71.0589}}, 
+#          "streak": 6, "mood": "Joyful", "created_at": datetime.utcnow()},
+#         {"name": "George Williams", "email": "george.w@example.com", "password": "hashed_password", 
+#          "location": {"city": "Austin", "state": "TX", "country": "USA", 
+#                       "coordinates": {"latitude": 30.2672, "longitude": -97.7431}}, 
+#          "streak": 4, "mood": "Optimistic", "created_at": datetime.utcnow()},
+#         {"name": "Hannah Lee", "email": "hannah.l@example.com", "password": "hashed_password", 
+#          "location": {"city": "Seattle", "state": "WA", "country": "USA", 
+#                       "coordinates": {"latitude": 47.6062, "longitude": -122.3321}}, 
+#          "streak": 1, "mood": "Calm", "created_at": datetime.utcnow()},
+#         {"name": "Ian O'Reilly", "email": "ian.o@example.com", "password": "hashed_password", 
+#          "location": {"city": "Orlando", "state": "FL", "country": "USA", 
+#                       "coordinates": {"latitude": 28.5383, "longitude": -81.3792}}, 
+#          "streak": 7, "mood": "Content", "created_at": datetime.utcnow()},
+#         {"name": "Julia Adams", "email": "julia.a@example.com", "password": "hashed_password", 
+#          "location": {"city": "Denver", "state": "CO", "country": "USA", 
+#                       "coordinates": {"latitude": 39.7392, "longitude": -104.9903}}, 
+#          "streak": 0, "mood": "Hopeful", "created_at": datetime.utcnow()}
+#     ]
 
+#     try:
+#         # Insert multiple users at once into the 'users' collection
+#         result = users.insert_many(users_sample)
+#         print(f"Inserted {len(result.inserted_ids)} sample users.")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding sample users: {e}")
+
+# Now, this function should work correctly without the NameError.
+# import random
+# from datetime import datetime, timedelta
+
+# def random_date(start, end):
+#     """Generate a random datetime between two datetime objects."""
+#     return start + timedelta(seconds=random.randint(0, int((end - start).total_seconds())))
+# def add_sample_good_deeds():
+#     """Function to insert sample good deeds into the MongoDB collection."""
+#     good_deeds_sample = [
+#         {"title": "Helped a neighbor with groceries", "description": "Assisted Mrs. Thompson in carrying her groceries.", 
+#          "location": {"city": "New York", "state": "NY", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Organized a community clean-up", "description": "Led a team to clean up the local park.", 
+#          "location": {"city": "Los Angeles", "state": "CA", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Donated clothes to charity", "description": "Donated winter clothes to the homeless shelter.", 
+#          "location": {"city": "Miami", "state": "FL", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Volunteered at the animal shelter", "description": "Spent time caring for animals at the shelter.", 
+#          "location": {"city": "San Francisco", "state": "CA", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Cooked meals for the needy", "description": "Prepared and served meals at the local soup kitchen.", 
+#          "location": {"city": "Chicago", "state": "IL", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Tutored children in math", "description": "Helped local kids improve their math skills.", 
+#          "location": {"city": "Boston", "state": "MA", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Planted trees in the community", "description": "Participated in a tree-planting event.", 
+#          "location": {"city": "Austin", "state": "TX", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Spearheaded a fundraiser", "description": "Organized a fundraiser to support local charities.", 
+#          "location": {"city": "Seattle", "state": "WA", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Conducted a blood drive", "description": "Organized a blood donation event.", 
+#          "location": {"city": "Orlando", "state": "FL", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Visited the elderly in nursing homes", "description": "Spent time with residents at a local nursing home.", 
+#          "location": {"city": "Denver", "state": "CO", "country": "USA"}, 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))}
+#     ]
+
+#     try:
+#         # Insert multiple good deeds at once into the 'good_deeds' collection
+#         result = good_deeds.insert_many(good_deeds_sample)
+#         print(f"Inserted {len(result.inserted_ids)} sample good deeds.")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding sample good deeds: {e}")
+# def add_sample_news():
+#     """Function to insert sample news articles into the MongoDB collection."""
+#     news_sample = [
+#         {"title": "Community Garden Thrives", "content": "A local community garden has been flourishing thanks to volunteers.", 
+#          "location": {"city": "New York", "state": "NY", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Park Clean-up Day Successful", "content": "Over 100 volunteers helped clean the park this weekend.", 
+#          "location": {"city": "Los Angeles", "state": "CA", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Charity Drive Exceeds Goals", "content": "The charity drive collected over $10,000 for local families.", 
+#          "location": {"city": "Miami", "state": "FL", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Animal Shelter Receives Donations", "content": "The shelter received a generous donation from the community.", 
+#          "location": {"city": "San Francisco", "state": "CA", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Local Soup Kitchen Opens New Branch", "content": "A new branch of the soup kitchen has opened downtown.", 
+#          "location": {"city": "Chicago", "state": "IL", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "After-School Program Helps Kids", "content": "An after-school program is providing support for children in need.", 
+#          "location": {"city": "Boston", "state": "MA", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Environmental Awareness Day Held", "content": "The community came together for environmental awareness.", 
+#          "location": {"city": "Austin", "state": "TX", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Fundraiser for Local Library", "content": "A successful fundraiser has raised money for the local library.", 
+#          "location": {"city": "Seattle", "state": "WA", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Blood Donation Event a Success", "content": "A blood donation event gathered many donors.", 
+#          "location": {"city": "Orlando", "state": "FL", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"title": "Community Sports Day Announced", "content": "A sports day event will be held to promote community engagement.", 
+#          "location": {"city": "Denver", "state": "CO", "country": "USA"}, 
+#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))}
+#     ]
+
+#     try:
+#         # Insert multiple news articles at once into the 'news' collection
+#         result = news.insert_many(news_sample)
+#         print(f"Inserted {len(result.inserted_ids)} sample news articles.")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding sample news articles: {e}")
+# def add_sample_replies(good_deed_ids):
+#     """Function to insert sample replies to good deeds into the MongoDB collection."""
+#     replies_sample = [
+#         {"good_deed_id": good_deed_ids[0], "user_name": "Jane Doe", "content": "Great job! Keep it up!", 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"good_deed_id": good_deed_ids[1], "user_name": "John Smith", "content": "Inspiring deed!", 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"good_deed_id": good_deed_ids[2], "user_name": "Alice Johnson", "content": "This is wonderful!", 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"good_deed_id": good_deed_ids[3], "user_name": "Bob Brown", "content": "Well done!", 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#         {"good_deed_id": good_deed_ids[4], "user_name": "Charlie White", "content": "Such a nice thing to do!", 
+#          "created_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
+#     ]
+
+#     try:
+#         # Insert multiple replies at once into the 'replies' collection
+#         result = replies.insert_many(replies_sample)
+#         print(f"Inserted {len(result.inserted_ids)} sample replies.")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while adding sample replies: {e}")
 
 if __name__ == "__main__":
-
+    # add_sample_users()
+    # add_sample_good_deeds()
+        
+    # # Retrieve the IDs of the inserted good deeds to use for replies
+    # good_deed_ids = [gd["_id"] for gd in good_deeds.find()]
+    
+    # add_sample_news()
+    
+    # add_sample_replies(good_deed_ids)
     main()
