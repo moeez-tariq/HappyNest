@@ -67,88 +67,88 @@ def add_good_deed():
 
 
 # # Add a new user with validation for required fields and default values
-# def add_user():
-#     name = input("Enter user name: ")
-#     email = input("Enter email: ")
-#     # Validate email format using regex
-#         # Validate email format
-#     email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-#     if not re.match(email_pattern, email):
-#         print("Error: Invalid email format.")
-#         return
-#     city = input("Enter city: ")
-#     state = input("Enter state: ")
-#     country = input("Enter country: ")
-#     password = input("Enter password: ")
+def add_user():
+    name = input("Enter user name: ")
+    email = input("Enter email: ")
+    # Validate email format using regex
+        # Validate email format
+    email_pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if not re.match(email_pattern, email):
+        print("Error: Invalid email format.")
+        return
+    city = input("Enter city: ")
+    state = input("Enter state: ")
+    country = input("Enter country: ")
+    password = input("Enter password: ")
 
-#     # Ensure none of the required fields are empty
-#     if not name or not email or not city or not state or not country:
-#         print("Error: All fields (name, email, city, state, country) are required.")
-#         return
+    # Ensure none of the required fields are empty
+    if not name or not email or not city or not state or not country:
+        print("Error: All fields (name, email, city, state, country) are required.")
+        return
 
-#     # Set default values for optional fields
-#     streak = input("Enter streak count (leave blank for 0): ")
-#     streak = int(streak) if streak else 0  # Default streak to 0 if left blank
-#     mood = input("Enter mood: ")
+    # Set default values for optional fields
+    streak = input("Enter streak count (leave blank for 0): ")
+    streak = int(streak) if streak else 0  # Default streak to 0 if left blank
+    mood = input("Enter mood: ")
 
-#     user = {
-#         "name": name,
-#         "email": email,
-#         "password": password, # Has to hashed 
-#         "location": {
-#             "city": city,
-#             "state": state,
-#             "country": country,
-#             "coordinates": {
-#                 "latitude": float(input("Enter latitude: ")),
-#                 "longitude": float(input("Enter longitude: "))
-#             }
-#         },
-#         "streak": streak,
-#         "mood": mood,
-#         "created_at": datetime.utcnow()
-#     }
+    user = {
+        "name": name,
+        "email": email,
+        "password": password, # Has to hashed 
+        "location": {
+            "city": city,
+            "state": state,
+            "country": country,
+            "coordinates": {
+                "latitude": float(input("Enter latitude: ")),
+                "longitude": float(input("Enter longitude: "))
+            }
+        },
+        "streak": streak,
+        "mood": mood,
+        "created_at": datetime.utcnow()
+    }
 
-#     try:
-#         result = users.insert_one(user)
-#         print(f"User added with ID: {result.inserted_id}")
-#     except pymongo.errors.PyMongoError as e:
-#         print(f"An error occurred while adding the user: {e}")
+    try:
+        result = users.insert_one(user)
+        print(f"User added with ID: {result.inserted_id}")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while adding the user: {e}")
 
 
 # # Add a good deed with validation for required fields
-# def add_good_deed():
-#     user_id = input("Enter user ID: ")
-#     title = input("Enter good deed title: ")
-#     city = input("Enter city: ")
-#     state = input("Enter state: ")
-#     country = input("Enter country: ")
-#     description = input("Enter good deed description: ")
+def add_good_deed():
+    user_id = input("Enter user ID: ")
+    title = input("Enter good deed title: ")
+    city = input("Enter city: ")
+    state = input("Enter state: ")
+    country = input("Enter country: ")
+    description = input("Enter good deed description: ")
 
-#     # Ensure required fields are not empty
-#     if not user_id or not description:
-#         print("Error: Both user ID and description are required.")
-#         return
+    # Ensure required fields are not empty
+    if not user_id or not description:
+        print("Error: Both user ID and description are required.")
+        return
 
-#     good_deed = {
-#         "user_id": user_id,
-#         "title": title,
-#         "location": {
-#             "city": city,
-#             "state": state,
-#             "country": country
-#         },
-#         "description": description,
-#         "completed_at": datetime.utcnow(),
-#         "streak_continued": bool(input("Streak continued (True/False): ")),
-#         "replies": []
-#     }
+    good_deed = {
+        "user_id": user_id,
+        "title": title,
+        "location": {
+            "city": city,
+            "state": state,
+            "country": country
+        },
+        "description": description,
+        "completed_at": datetime.utcnow(),
+        "streak_continued": bool(input("Streak continued (True/False): ")),
+        "replies": []
+    }
 
-#     try:
-#         result = good_deeds.insert_one(good_deed)
-#         print(f"Good deed added with ID: {result.inserted_id}")
-#     except pymongo.errors.PyMongoError as e:
-#         print(f"An error occurred while adding the good deed: {e}")
+    try:
+        result = good_deeds.insert_one(good_deed)
+        print(f"Good deed added with ID: {result.inserted_id}")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while adding the good deed: {e}")
 
 
 # # Add a news article with validation for required fields
@@ -296,6 +296,40 @@ def view_all(collection):
                                 print(f"  Reply with ID {reply_id} not found.")
     except pymongo.errors.PyMongoError as e:
         print(f"An error occurred while retrieving documents from {collection.name}: {e}")
+def view_replies():
+    deed_id = input("Enter the ID of the good deed to view replies: ").strip()  # Strip whitespace
+
+    try:
+        # Find the good deed by its ID
+        good_deed = good_deeds.find_one({"_id": ObjectId(deed_id)})
+        
+        if good_deed:
+            print(f"\nGood Deed ID: {good_deed['_id']}")
+            print(f"Title: {good_deed['title']}")
+            print(f"Description: {good_deed['description']}")
+            # print(f"Completed At: {good_deed['completed_at']}")
+            print("Replies:")
+            
+            # Fetch replies based on the good deed's replies list
+            if 'replies' in good_deed and good_deed['replies']:
+                for reply_id in good_deed['replies']:
+                    reply = replies.find_one({"_id": ObjectId(reply_id)})
+                    if reply:
+                        print(f"  Reply ID: {reply['_id']}")
+                        print(f"  User ID: {reply['user_id']}")
+                        print(f"  Content: {reply['content']}")
+                        print(f"  Created At: {reply['created_at']}")
+                    else:
+                        print(f"  Reply with ID {reply_id} not found.")
+            else:
+                print("  No replies found for this good deed.")
+        else:
+            print(f"No good deed found with ID: {deed_id}")
+
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while retrieving replies: {e}")
+
+
 
 # Update a reply in the replies collection with valid field checks
 def update_reply():
@@ -447,17 +481,18 @@ def main():
         print("5. View all users")
         print("6. View all good deeds")
         print("7. View all news articles")
-        print("8. Update a user")
-        print("9. Update a good deed")
-        print("10. Update a news article")
-        print("11. Update a reply")
-        print("12. Delete a user")
-        print("13. Delete a good deed")
-        print("14. Delete a news article")
-        print("15. Delete a reply")
-        print("16. Exit")
+        print("8. View all replies")  # New option added
+        print("9. Update a user")
+        print("10. Update a good deed")
+        print("11. Update a news article")
+        print("12. Update a reply")
+        print("13. Delete a user")
+        print("14. Delete a good deed")
+        print("15. Delete a news article")
+        print("16. Delete a reply")
+        print("17. Exit")  # Updated option number
 
-        choice = input("Enter your choice (1-16): ")
+        choice = input("Enter your choice (1-17): ")  # Updated range
 
         if choice == '1':
             add_user()
@@ -473,23 +508,25 @@ def main():
             view_all(good_deeds)
         elif choice == '7':
             view_all(news)
-        elif choice == '8':
-            update_document(users)
+        elif choice == '8':  
+            view_replies() 
         elif choice == '9':
-            update_document(good_deeds)
+            update_document(users)
         elif choice == '10':
-            update_document(news)
+            update_document(good_deeds)
         elif choice == '11':
-            update_reply()
+            update_document(news)
         elif choice == '12':
-            delete_document(users)
+            update_reply()
         elif choice == '13':
-            delete_document(good_deeds)
+            delete_document(users)
         elif choice == '14':
-            delete_document(news)
+            delete_document(good_deeds)
         elif choice == '15':
-            delete_reply()
+            delete_document(news)
         elif choice == '16':
+            delete_reply()
+        elif choice == '17':  
             break
         else:
             print("Invalid choice. Please try again.")
@@ -498,5 +535,7 @@ def main():
     print("Goodbye!")
 
 
+
 if __name__ == "__main__":
+
     main()
