@@ -117,40 +117,6 @@ def add_user():
         print(f"An error occurred while adding the user: {e}")
 
 
-# # Add a good deed with validation for required fields
-def add_good_deed():
-    user_id = input("Enter user ID: ")
-    title = input("Enter good deed title: ")
-    city = input("Enter city: ")
-    state = input("Enter state: ")
-    country = input("Enter country: ")
-    description = input("Enter good deed description: ")
-
-    # Ensure required fields are not empty
-    if not user_id or not description:
-        print("Error: Both user ID and description are required.")
-        return
-
-    good_deed = {
-        "user_id": user_id,
-        "title": title,
-        "location": {
-            "city": city,
-            "state": state,
-            "country": country
-        },
-        "description": description,
-        "completed_at": datetime.utcnow(),
-        "streak_continued": bool(input("Streak continued (True/False): ")),
-        "replies": []
-    }
-
-    try:
-        result = good_deeds.insert_one(good_deed)
-        print(f"Good deed added with ID: {result.inserted_id}")
-    except pymongo.errors.PyMongoError as e:
-        print(f"An error occurred while adding the good deed: {e}")
-
 
 # # Add a news article with validation for required fields
 # def add_news():
@@ -535,65 +501,60 @@ def main():
     client.close()
     print("Goodbye!")
 
-# def add_sample_users():
-#     """Function to insert sample users into the MongoDB collection."""
-#     users_sample = [
-#         {"name": "Alice Johnson", "email": "alice.j@example.com", "password": "hashed_password", 
-#          "location": {"city": "New York", "state": "NY", "country": "USA", 
-#                       "coordinates": {"latitude": 40.7128, "longitude": -74.0060}}, 
-#          "streak": 5, "mood": "Happy", "created_at": datetime.utcnow()},
-#         {"name": "Bob Smith", "email": "bob.s@example.com", "password": "hashed_password", 
-#          "location": {"city": "Los Angeles", "state": "CA", "country": "USA", 
-#                       "coordinates": {"latitude": 34.0522, "longitude": -118.2437}}, 
-#          "streak": 2, "mood": "Excited", "created_at": datetime.utcnow()},
-#         {"name": "Carlos Martinez", "email": "carlos.m@example.com", "password": "hashed_password", 
-#          "location": {"city": "Miami", "state": "FL", "country": "USA", 
-#                       "coordinates": {"latitude": 25.7617, "longitude": -80.1918}}, 
-#          "streak": 8, "mood": "Cheerful", "created_at": datetime.utcnow()},
-#         {"name": "Diana Cheng", "email": "diana.c@example.com", "password": "hashed_password", 
-#          "location": {"city": "San Francisco", "state": "CA", "country": "USA", 
-#                       "coordinates": {"latitude": 37.7749, "longitude": -122.4194}}, 
-#          "streak": 3, "mood": "Motivated", "created_at": datetime.utcnow()},
-#         {"name": "Edward King", "email": "edward.k@example.com", "password": "hashed_password", 
-#          "location": {"city": "Chicago", "state": "IL", "country": "USA", 
-#                       "coordinates": {"latitude": 41.8781, "longitude": -87.6298}}, 
-#          "streak": 10, "mood": "Grateful", "created_at": datetime.utcnow()},
-#         {"name": "Fiona Davis", "email": "fiona.d@example.com", "password": "hashed_password", 
-#          "location": {"city": "Boston", "state": "MA", "country": "USA", 
-#                       "coordinates": {"latitude": 42.3601, "longitude": -71.0589}}, 
-#          "streak": 6, "mood": "Joyful", "created_at": datetime.utcnow()},
-#         {"name": "George Williams", "email": "george.w@example.com", "password": "hashed_password", 
-#          "location": {"city": "Austin", "state": "TX", "country": "USA", 
-#                       "coordinates": {"latitude": 30.2672, "longitude": -97.7431}}, 
-#          "streak": 4, "mood": "Optimistic", "created_at": datetime.utcnow()},
-#         {"name": "Hannah Lee", "email": "hannah.l@example.com", "password": "hashed_password", 
-#          "location": {"city": "Seattle", "state": "WA", "country": "USA", 
-#                       "coordinates": {"latitude": 47.6062, "longitude": -122.3321}}, 
-#          "streak": 1, "mood": "Calm", "created_at": datetime.utcnow()},
-#         {"name": "Ian O'Reilly", "email": "ian.o@example.com", "password": "hashed_password", 
-#          "location": {"city": "Orlando", "state": "FL", "country": "USA", 
-#                       "coordinates": {"latitude": 28.5383, "longitude": -81.3792}}, 
-#          "streak": 7, "mood": "Content", "created_at": datetime.utcnow()},
-#         {"name": "Julia Adams", "email": "julia.a@example.com", "password": "hashed_password", 
-#          "location": {"city": "Denver", "state": "CO", "country": "USA", 
-#                       "coordinates": {"latitude": 39.7392, "longitude": -104.9903}}, 
-#          "streak": 0, "mood": "Hopeful", "created_at": datetime.utcnow()}
-#     ]
+def add_sample_users():
+    """Function to insert sample users into the MongoDB collection."""
+    users_sample = [
+        {"name": "Alice Johnson", "email": "alice.j@example.com", "password": "hashed_password", 
+         "location": {"city": "New York", "state": "NY", "country": "USA", 
+                      "coordinates": {"latitude": 40.7128, "longitude": -74.0060}}, 
+         "streak": 5, "mood": "Happy", "created_at": datetime.utcnow()},
+        {"name": "Bob Smith", "email": "bob.s@example.com", "password": "hashed_password", 
+         "location": {"city": "Los Angeles", "state": "CA", "country": "USA", 
+                      "coordinates": {"latitude": 34.0522, "longitude": -118.2437}}, 
+         "streak": 2, "mood": "Excited", "created_at": datetime.utcnow()},
+        {"name": "Carlos Martinez", "email": "carlos.m@example.com", "password": "hashed_password", 
+         "location": {"city": "Miami", "state": "FL", "country": "USA", 
+                      "coordinates": {"latitude": 25.7617, "longitude": -80.1918}}, 
+         "streak": 8, "mood": "Cheerful", "created_at": datetime.utcnow()},
+        {"name": "Diana Cheng", "email": "diana.c@example.com", "password": "hashed_password", 
+         "location": {"city": "San Francisco", "state": "CA", "country": "USA", 
+                      "coordinates": {"latitude": 37.7749, "longitude": -122.4194}}, 
+         "streak": 3, "mood": "Motivated", "created_at": datetime.utcnow()},
+        {"name": "Edward King", "email": "edward.k@example.com", "password": "hashed_password", 
+         "location": {"city": "Chicago", "state": "IL", "country": "USA", 
+                      "coordinates": {"latitude": 41.8781, "longitude": -87.6298}}, 
+         "streak": 10, "mood": "Grateful", "created_at": datetime.utcnow()},
+        {"name": "Fiona Davis", "email": "fiona.d@example.com", "password": "hashed_password", 
+         "location": {"city": "Boston", "state": "MA", "country": "USA", 
+                      "coordinates": {"latitude": 42.3601, "longitude": -71.0589}}, 
+         "streak": 6, "mood": "Joyful", "created_at": datetime.utcnow()},
+        {"name": "George Williams", "email": "george.w@example.com", "password": "hashed_password", 
+         "location": {"city": "Austin", "state": "TX", "country": "USA", 
+                      "coordinates": {"latitude": 30.2672, "longitude": -97.7431}}, 
+         "streak": 4, "mood": "Optimistic", "created_at": datetime.utcnow()},
+        {"name": "Hannah Lee", "email": "hannah.l@example.com", "password": "hashed_password", 
+         "location": {"city": "Seattle", "state": "WA", "country": "USA", 
+                      "coordinates": {"latitude": 47.6062, "longitude": -122.3321}}, 
+         "streak": 1, "mood": "Calm", "created_at": datetime.utcnow()},
+        {"name": "Ian O'Reilly", "email": "ian.o@example.com", "password": "hashed_password", 
+         "location": {"city": "Orlando", "state": "FL", "country": "USA", 
+                      "coordinates": {"latitude": 28.5383, "longitude": -81.3792}}, 
+         "streak": 7, "mood": "Content", "created_at": datetime.utcnow()},
+        {"name": "Julia Adams", "email": "julia.a@example.com", "password": "hashed_password", 
+         "location": {"city": "Denver", "state": "CO", "country": "USA", 
+                      "coordinates": {"latitude": 39.7392, "longitude": -104.9903}}, 
+         "streak": 0, "mood": "Hopeful", "created_at": datetime.utcnow()}
+    ]
 
-#     try:
-#         # Insert multiple users at once into the 'users' collection
-#         result = users.insert_many(users_sample)
-#         print(f"Inserted {len(result.inserted_ids)} sample users.")
-#     except pymongo.errors.PyMongoError as e:
-#         print(f"An error occurred while adding sample users: {e}")
+    try:
+        # Insert multiple users at once into the 'users' collection
+        result = users.insert_many(users_sample)
+        print(f"Inserted {len(result.inserted_ids)} sample users.")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while adding sample users: {e}")
 
-# Now, this function should work correctly without the NameError.
-# import random
-# from datetime import datetime, timedelta
 
-# def random_date(start, end):
-#     """Generate a random datetime between two datetime objects."""
-#     return start + timedelta(seconds=random.randint(0, int((end - start).total_seconds())))
+
 # def add_sample_good_deeds():
 #     """Function to insert sample good deeds into the MongoDB collection."""
 #     good_deeds_sample = [
@@ -851,6 +812,157 @@ def delete_all_replies():
         print(f"Deleted {result.deleted_count} replies.")
     except pymongo.errors.PyMongoError as e:
         print(f"An error occurred while deleting replies: {e}")
+def add_sample_good_deeds():
+    """Function to insert sample good deeds into the MongoDB collection."""
+    good_deeds_sample = [
+        {
+            "user_id": "user1",
+            "title": "Helped a neighbor with groceries",
+            "location": {
+                "city": "New York",
+                "state": "NY",
+                "country": "USA",
+                "coordinates": {"latitude": 40.7128, "longitude": -74.0060}
+            },
+            "description": "Assisted Mrs. Thompson in carrying her groceries.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": True,
+            "replies": []
+        },
+        {
+            "user_id": "user2",
+            "title": "Organized a community clean-up",
+            "location": {
+                "city": "Los Angeles",
+                "state": "CA",
+                "country": "USA",
+                "coordinates": {"latitude": 34.0522, "longitude": -118.2437}
+            },
+            "description": "Led a team to clean up the local park.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": False,
+            "replies": []
+        },
+        {
+            "user_id": "user3",
+            "title": "Donated clothes to charity",
+            "location": {
+                "city": "Miami",
+                "state": "FL",
+                "country": "USA",
+                "coordinates": {"latitude": 25.7617, "longitude": -80.1918}
+            },
+            "description": "Donated winter clothes to the homeless shelter.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": True,
+            "replies": []
+        },
+        {
+            "user_id": "user4",
+            "title": "Volunteered at the animal shelter",
+            "location": {
+                "city": "San Francisco",
+                "state": "CA",
+                "country": "USA",
+                "coordinates": {"latitude": 37.7749, "longitude": -122.4194}
+            },
+            "description": "Spent time caring for animals at the shelter.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": True,
+            "replies": []
+        },
+        {
+            "user_id": "user5",
+            "title": "Cooked meals for the needy",
+            "location": {
+                "city": "Chicago",
+                "state": "IL",
+                "country": "USA",
+                "coordinates": {"latitude": 41.8781, "longitude": -87.6298}
+            },
+            "description": "Prepared and served meals at the local soup kitchen.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": False,
+            "replies": []
+        },
+        {
+            "user_id": "user6",
+            "title": "Tutored children in math",
+            "location": {
+                "city": "Boston",
+                "state": "MA",
+                "country": "USA",
+                "coordinates": {"latitude": 42.3601, "longitude": -71.0589}
+            },
+            "description": "Helped local kids improve their math skills.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": True,
+            "replies": []
+        },
+        {
+            "user_id": "user7",
+            "title": "Planted trees in the community",
+            "location": {
+                "city": "Austin",
+                "state": "TX",
+                "country": "USA",
+                "coordinates": {"latitude": 30.2672, "longitude": -97.7431}
+            },
+            "description": "Participated in a tree-planting event.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": False,
+            "replies": []
+        },
+        {
+            "user_id": "user8",
+            "title": "Spearheaded a fundraiser",
+            "location": {
+                "city": "Seattle",
+                "state": "WA",
+                "country": "USA",
+                "coordinates": {"latitude": 47.6062, "longitude": -122.3321}
+            },
+            "description": "Organized a fundraiser to support local charities.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": True,
+            "replies": []
+        },
+        {
+            "user_id": "user9",
+            "title": "Conducted a blood drive",
+            "location": {
+                "city": "Orlando",
+                "state": "FL",
+                "country": "USA",
+                "coordinates": {"latitude": 28.5383, "longitude": -81.3792}
+            },
+            "description": "Organized a blood donation event.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": False,
+            "replies": []
+        },
+        {
+            "user_id": "user10",
+            "title": "Visited the elderly in nursing homes",
+            "location": {
+                "city": "Denver",
+                "state": "CO",
+                "country": "USA",
+                "coordinates": {"latitude": 39.7392, "longitude": -104.9903}
+            },
+            "description": "Spent time with residents at a local nursing home.",
+            "completed_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1)),
+            "streak_continued": True,
+            "replies": []
+        }
+    ]
+
+    try:
+        # Insert multiple good deeds at once into the 'good_deeds' collection
+        result = good_deeds.insert_many(good_deeds_sample)
+        print(f"Inserted {len(result.inserted_ids)} sample good deeds.")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while adding sample good deeds: {e}")
 
 
 if __name__ == "__main__":
@@ -860,7 +972,7 @@ if __name__ == "__main__":
     # # Retrieve the IDs of the inserted good deeds to use for replies
     # good_deed_ids = [gd["_id"] for gd in good_deeds.find()]
     # delete_all_sample_news()
-    add_sample_news()
+    # add_sample_news()
     # delete_all_good_deeds()
     # delete_all_replies()
 
