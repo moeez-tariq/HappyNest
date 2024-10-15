@@ -56,8 +56,8 @@ You can access the various /news endpoints.
     "state": "Texas",
     "country": "USA"
   },
-  "published_at": "2024-01-10T10:00:00Z",
   "source": "Local News"
+  "sentiment": "neutral"
 }
 ```
 
@@ -73,7 +73,6 @@ You can access the various /news endpoints.
     "state": "Texas",
     "country": "USA"
   },
-  "published_at": "2024-01-11T10:00:00Z",
   "source": "Updated Source",
   "sentiment": "neutral"
 }
