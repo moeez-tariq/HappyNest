@@ -28,6 +28,7 @@ For ease of grading, you may consider the endpoints related to the `News` collec
   pip install requirements.txt
   ```
 
+Now, you should have access to our MongoDB database which has sample data created from the sample_db.py file.
 ### 2. **Running the API**
 - Run the FastAPI server
 ```
@@ -36,7 +37,7 @@ uvicorn api:app --reload
 - The server will start, and the FastAPI docs can be accessed at http://127.0.0.1:8000/docs or http://localhost:8000/docs.
 
 ### 3. **Use Postman to Interact with the API**
-You can access the various /news endpoints.
+You can access the various /news/ endpoints. To use our Postman collection, import the file in the directory "Postman Collections" into your Postman app and you can run each of our APIs. Please keep to the /news/ and /users/ APIs as there may be some issues with /good_deeds/. Below are some examples for how /news/ works.
 
 #### 1. Get all news articles
 - GET `/news/`
