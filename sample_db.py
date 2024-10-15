@@ -4,7 +4,8 @@ import pymongo
 import re
 from bson.objectid import ObjectId
 from datetime import datetime
-
+import random
+from datetime import datetime, timedelta
 load_dotenv()
 mongodb_uri = os.getenv('MONGODB_URI')
 print(mongodb_uri)
@@ -634,47 +635,175 @@ def main():
 #         print(f"Inserted {len(result.inserted_ids)} sample good deeds.")
 #     except pymongo.errors.PyMongoError as e:
 #         print(f"An error occurred while adding sample good deeds: {e}")
-# def add_sample_news():
-#     """Function to insert sample news articles into the MongoDB collection."""
-#     news_sample = [
-#         {"title": "Community Garden Thrives", "content": "A local community garden has been flourishing thanks to volunteers.", 
-#          "location": {"city": "New York", "state": "NY", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Park Clean-up Day Successful", "content": "Over 100 volunteers helped clean the park this weekend.", 
-#          "location": {"city": "Los Angeles", "state": "CA", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Charity Drive Exceeds Goals", "content": "The charity drive collected over $10,000 for local families.", 
-#          "location": {"city": "Miami", "state": "FL", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Animal Shelter Receives Donations", "content": "The shelter received a generous donation from the community.", 
-#          "location": {"city": "San Francisco", "state": "CA", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Local Soup Kitchen Opens New Branch", "content": "A new branch of the soup kitchen has opened downtown.", 
-#          "location": {"city": "Chicago", "state": "IL", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "After-School Program Helps Kids", "content": "An after-school program is providing support for children in need.", 
-#          "location": {"city": "Boston", "state": "MA", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Environmental Awareness Day Held", "content": "The community came together for environmental awareness.", 
-#          "location": {"city": "Austin", "state": "TX", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Fundraiser for Local Library", "content": "A successful fundraiser has raised money for the local library.", 
-#          "location": {"city": "Seattle", "state": "WA", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Blood Donation Event a Success", "content": "A blood donation event gathered many donors.", 
-#          "location": {"city": "Orlando", "state": "FL", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))},
-#         {"title": "Community Sports Day Announced", "content": "A sports day event will be held to promote community engagement.", 
-#          "location": {"city": "Denver", "state": "CO", "country": "USA"}, 
-#          "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))}
-#     ]
+def random_date(start, end):
+    """Generate a random datetime between two datetime objects."""
+    delta = end - start
+    int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
+    random_second = random.randint(0, int_delta)
+    return start + timedelta(seconds=random_second)
 
-#     try:
-#         # Insert multiple news articles at once into the 'news' collection
-#         result = news.insert_many(news_sample)
-#         print(f"Inserted {len(result.inserted_ids)} sample news articles.")
-#     except pymongo.errors.PyMongoError as e:
-#         print(f"An error occurred while adding sample news articles: {e}")
+def add_sample_news():
+    """Function to insert sample news articles into the MongoDB collection."""
+    news_sample = [
+        {
+            "title": "Community Garden Thrives",
+            "content": "A local community garden has been flourishing thanks to volunteers.", 
+            "location": {
+                "city": "New York", 
+                "state": "NY", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 40.7128,    
+                    "longitude": -74.0060
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Park Clean-up Day Successful",
+            "content": "Over 100 volunteers helped clean the park this weekend.", 
+            "location": {
+                "city": "Los Angeles", 
+                "state": "CA", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 34.0522,    
+                    "longitude": -118.2437
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Charity Drive Exceeds Goals",
+            "content": "The charity drive collected over $10,000 for local families.", 
+            "location": {
+                "city": "Miami", 
+                "state": "FL", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 25.7617,    
+                    "longitude": -80.1918
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Animal Shelter Receives Donations",
+            "content": "The shelter received a generous donation from the community.", 
+            "location": {
+                "city": "San Francisco", 
+                "state": "CA", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 37.7749,    
+                    "longitude": -122.4194
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Local Soup Kitchen Opens New Branch",
+            "content": "A new branch of the soup kitchen has opened downtown.", 
+            "location": {
+                "city": "Chicago", 
+                "state": "IL", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 41.8781,    
+                    "longitude": -87.6298
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "After-School Program Helps Kids",
+            "content": "An after-school program is providing support for children in need.", 
+            "location": {
+                "city": "Boston", 
+                "state": "MA", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 42.3601,    
+                    "longitude": -71.0589
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Environmental Awareness Day Held",
+            "content": "The community came together for environmental awareness.", 
+            "location": {
+                "city": "Austin", 
+                "state": "TX", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 30.2672,    
+                    "longitude": -97.7431
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Fundraiser for Local Library",
+            "content": "A successful fundraiser has raised money for the local library.", 
+            "location": {
+                "city": "Seattle", 
+                "state": "WA", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 47.6062,    
+                    "longitude": -122.3321
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Blood Donation Event a Success",
+            "content": "A blood donation event gathered many donors.", 
+            "location": {
+                "city": "Orlando", 
+                "state": "FL", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 28.5383,    
+                    "longitude": -81.3792
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        },
+        {
+            "title": "Community Sports Day Announced",
+            "content": "A sports day event will be held to promote community engagement.", 
+            "location": {
+                "city": "Denver", 
+                "state": "CO", 
+                "country": "USA", 
+                "coordinates": {
+                    "latitude": 39.7392,    
+                    "longitude": -104.9903
+                }
+            }, 
+            "sentiment": "positive",
+            "published_at": random_date(datetime(2023, 1, 1), datetime(2024, 1, 1))
+        }
+    ]
+
+    try:
+        # Insert multiple news articles at once into the 'news' collection
+        result = news.insert_many(news_sample)
+        print(f"Inserted {len(result.inserted_ids)} sample news articles.")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while adding sample news articles: {e}")
+
 # def add_sample_replies(good_deed_ids):
 #     """Function to insert sample replies to good deeds into the MongoDB collection."""
 #     replies_sample = [
@@ -696,6 +825,33 @@ def main():
 #         print(f"Inserted {len(result.inserted_ids)} sample replies.")
 #     except pymongo.errors.PyMongoError as e:
 #         print(f"An error occurred while adding sample replies: {e}")
+# def delete_all_good_deeds():
+#     confirmation = input("Are you sure you want to delete ALL good deeds? This action cannot be undone. (yes/no): ").strip().lower()
+    
+#     if confirmation == 'yes':
+#         try:
+#             result = good_deeds.delete_many({})  # Delete all documents
+#             print(f"Deleted {result.deleted_count} good deed(s) from the collection.")
+#         except pymongo.errors.PyMongoError as e:
+#             print(f"An error occurred while deleting good deeds: {e}")
+#     else:
+#         print("Operation cancelled. No good deeds were deleted.")
+# def delete_all_sample_news():
+#     """Function to delete all sample news from the MongoDB collection."""
+#     try:
+#         # Delete all documents from the 'news' collection
+#         result = news.delete_many({})
+#         print(f"Deleted {result.deleted_count} sample news entries.")
+#     except pymongo.errors.PyMongoError as e:
+#         print(f"An error occurred while deleting sample news: {e}")
+def delete_all_replies():
+    try:
+        # Delete all documents in the 'replies' collection
+        result = replies.delete_many({})
+        print(f"Deleted {result.deleted_count} replies.")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while deleting replies: {e}")
+
 
 if __name__ == "__main__":
     # add_sample_users()
@@ -703,8 +859,10 @@ if __name__ == "__main__":
         
     # # Retrieve the IDs of the inserted good deeds to use for replies
     # good_deed_ids = [gd["_id"] for gd in good_deeds.find()]
-    
-    # add_sample_news()
-    
+    # delete_all_sample_news()
+    add_sample_news()
+    # delete_all_good_deeds()
+    # delete_all_replies()
+
     # add_sample_replies(good_deed_ids)
     main()
