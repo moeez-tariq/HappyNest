@@ -1,4 +1,88 @@
-# HappyNest: Where Good Deeds Take Flight!
+# HappyNest: Week 6
+
+We have used **FastAPI** and **MongoDB** to create the API for our HappyNest application. There are four collections to take note of:
+
+- `Users`
+- `GoodDeeds`
+- `News`
+- `Replies`
+
+For ease of grading, you may consider the endpoints related to the `News` collection as the primary routes to test. These endpoints will help us organize and display happy news articles to users of our application based on title, location, and other info.
+
+## Instructions to Set Up and Run the Application
+
+### 1. **Setting Up Database & Dependencies**
+
+- Clone and Navigate to the repository:
+  ```bash
+  git clone https://github.com/moeez-tariq/HappyNest
+  cd HappyNest
+  ```
+- Set up the environment and Store your MongoDB URI in an `.env` file with the following content:
+  ```
+  MONGODB_URI=<your_mongo_uri>
+  ```
+
+- Install required Python libraries:
+  ```bash
+  pip install requirements.txt
+  ```
+
+### 2. **Running the API**
+- Run the FastAPI server
+```
+uvicorn api:app --reload
+```
+- The server will start, and the FastAPI docs can be accessed at http://127.0.0.1:8000/docs or http://localhost:8000/docs.
+
+### 3. **Use Postman to Interact with the API**
+You can access the various /news endpoints.
+
+#### 1. Get all news articles
+- GET `/news/`
+
+#### 2. Get a Single News Article by ID
+- GET `/news/{id}`
+
+#### 3. Add a New News Article
+- POST `/news/`
+- Example request body:
+```
+{
+  "title": "Community Event",
+  "content": "Join us for a community gathering...",
+  "location": {
+    "city": "Austin",
+    "state": "Texas",
+    "country": "USA"
+  },
+  "published_at": "2024-01-10T10:00:00Z",
+  "source": "Local News"
+}
+```
+
+#### 4. Update an Existing News Article
+- PUT `/news/{id}`
+- Example request body
+```
+{
+  "title": "Updated Community Event",
+  "content": "The event has been rescheduled...",
+  "location": {
+    "city": "Austin",
+    "state": "Texas",
+    "country": "USA"
+  },
+  "published_at": "2024-01-11T10:00:00Z",
+  "source": "Updated Source",
+  "sentiment": "neutral"
+}
+```
+
+#### 5. Delete a News Article
+- DELETE `/news/{id}`
+
+# HappyNest: Week 5
 
 ## Our Database
 
