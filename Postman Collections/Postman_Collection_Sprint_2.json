@@ -1,0 +1,411 @@
+{
+	"info": {
+		"_postman_id": "900ab437-17bb-4f40-8a10-312b289ccfb1",
+		"name": "Sprint 2 Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Users",
+			"id": "540b54a4-c3cc-4b01-8863-b1ca9b596db0",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Type\":\"Update\",\"Timestamp\":\"2024-06-27T11:13:57.148Z\",\"Name\":\"Form 3\",\"Number\":\"+923316987132\",\"Name of Point of Contact\":\"POC 3\",\"Number of Point of Contact in +971 format\":1234,\"Status\":\"Approved\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/users"
+			},
+			"response": []
+		},
+		{
+			"name": "Get a Specific User",
+			"id": "62d4ccd7-2f2a-4f30-acf3-90ac202051d7",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Type\":\"Update\",\"Timestamp\":\"2024-06-27T11:13:57.148Z\",\"Name\":\"Form 3\",\"Number\":\"+923316987132\",\"Name of Point of Contact\":\"POC 3\",\"Number of Point of Contact in +971 format\":1234,\"Status\":\"Approved\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/users/670c611a7dbe1499949cbe04"
+			},
+			"response": []
+		},
+		{
+			"name": "Post a New User",
+			"id": "e1018e18-829b-40bf-9cfa-833b08c72940",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"securepassword\",\n  \"location\": {\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"coordinates\": {\n      \"latitude\": 40.7128,\n      \"longitude\": -74.0060\n    }\n  },\n  \"streak\": 10,\n  \"mood\": \"happy\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/users/"
+			},
+			"response": []
+		},
+		{
+			"name": "Change Name of A User",
+			"id": "82dff3d9-6352-4260-8e11-fa235a475e34",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"New Name\",\n  \"email\": \"newname@example.com\",\n  \"password\": \"securepassword\",\n  \"location\": {\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"coordinates\": {\n      \"latitude\": 40.7128,\n      \"longitude\": -74.0060\n    }\n  },\n  \"streak\": 10,\n  \"mood\": \"happy\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/users/670dfb82de13a6d7e3576c51"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete A User",
+			"id": "709a22ac-7522-455c-b662-c57e0f336176",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": "http://localhost:8000/users/670dfb82de13a6d7e3576c51"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All News",
+			"id": "2cd6f995-f8f4-47b4-84ad-b58f1f44d534",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://127.0.0.1:8000/news"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Specific News",
+			"id": "0b690cad-9437-4205-b13c-0989e3023c6a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://127.0.0.1:8000/news/670dc687692f046845647a3d"
+			},
+			"response": []
+		},
+		{
+			"name": "Post New News",
+			"id": "fd4ca356-f893-496b-ae42-ca48f6da2516",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Climate Awareness Campaign Launches\",\n  \"content\": \"A new campaign has been launched to raise awareness about climate change.\",\n  \"location\": {\n    \"city\": \"New York\",\n    \"state\": \"New York\",\n    \"country\": \"USA\",\n    \"coordinates\": {\n      \"latitude\": 40.7128,\n      \"longitude\": -74.0060\n    }\n  },\n  \"sentiment\": \"positive\",\n  \"published_at\": \"2024-10-15T00:00:00Z\",\n  \"source\": \"New York Times\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/news"
+			},
+			"response": []
+		},
+		{
+			"name": "Update News Article",
+			"id": "f2d2d654-e295-4717-8f19-97308a9f40a2",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Climate Awareness Campaign Launches\",\n  \"content\": \"A new campaign has been launched to raise awareness about climate change.\",\n  \"location\": {\n    \"city\": \"Lahore\",\n    \"state\": \"Punjabi\",\n    \"country\": \"Pakistan\",\n    \"coordinates\": {\n      \"latitude\": 40.7128,\n      \"longitude\": -74.0060\n    }\n  },\n  \"sentiment\": \"positive\",\n  \"published_at\": \"2024-10-15T00:00:00Z\",\n  \"source\": \"Pakistan Times\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/news/670e13e6de13a6d7e3576c53"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete News",
+			"id": "207549fd-7dc8-4f24-b813-de3914652987",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": "http://localhost:8000/news/670e13e6de13a6d7e3576c53"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All replies to a Good Deed",
+			"id": "f61bd047-9e8b-4ed7-a92a-70c7e847f52d",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://127.0.0.1:8000/good-deeds/670dc4fb692f046845647a37/replies"
+			},
+			"response": []
+		},
+		{
+			"name": "Get A Specific Reply",
+			"id": "d8bc5484-d469-4879-a4d7-4398138e61a8",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8000/replies/670dc54eb9e2f3fe668d59aa"
+			},
+			"response": []
+		},
+		{
+			"name": "Post A New Reply",
+			"id": "9ea706e5-6108-441c-ab19-8461c42e0bbf",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"deed_id\": \"670dc4fb692f046845647a37\",\n  \"user_id\": \"670c611a7dbe1499949cbe04\",\n  \"content\": \"This is a great initiative! Keep it up.\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/good-deeds/670dc4fb692f046845647a37/replies/"
+			},
+			"response": []
+		},
+		{
+			"name": "Update A Reply",
+			"id": "613ee4e5-39e3-410f-98d2-6dae6b63b7f1",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"deed_id\": \"670dc4fb692f046845647a37\",\n  \"user_id\": \"670c611a7dbe1499949cbe04\",\n  \"content\": \"I love your initiative! You inspire me!\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/replies/670e1f53de13a6d7e3576c54"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete A Reply",
+			"id": "6a3539f2-c50e-45e3-82cb-a0000dc274aa",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": "http://localhost:8000/replies/670e1f53de13a6d7e3576c54"
+			},
+			"response": []
+		},
+		{
+			"name": "Get A Specific Good Deed",
+			"id": "096f8e57-1c4a-4889-ac4c-58a2c6b04383",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://127.0.0.1:8000/good-deeds/670e1d06fb6d57daf5e9768c"
+			},
+			"response": []
+		},
+		{
+			"name": "Post A New Good Deed",
+			"id": "d74d8037-3391-4e05-b115-527f7763528c",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"user_id\": \"670c611a7dbe1499949cbe04\",\n  \"title\": \"Community Clean-Up Day\",\n  \"location\": {\n    \"city\": \"New York\",\n    \"state\": \"New York\",\n    \"country\": \"USA\",\n    \"coordinates\": {\n      \"latitude\": 40.7128,\n      \"longitude\": -74.0060\n    }\n  },\n  \"description\": \"Organizing a community event to clean up the local park.\",\n  \"completed_at\": \"2024-10-15T00:00:00Z\",\n  \"streak_continued\": true,\n  \"replies\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/good-deeds"
+			},
+			"response": []
+		},
+		{
+			"name": "Update A Good Deed",
+			"id": "d1c62026-26f7-49e9-8ec4-1dddd171c530",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"user_id\": \"670c611a7dbe1499949cbe04\",\n  \"title\": \"Community Clean-Up Day Updated\",\n  \"location\": {\n    \"city\": \"Los Angeles\",\n    \"state\": \"California\",\n    \"country\": \"USA\",\n    \"coordinates\": {\n      \"latitude\": 34.0522,\n      \"longitude\": -118.2437\n    }\n  },\n  \"description\": \"Organizing a community event to clean up the local beach.\",\n  \"completed_at\": \"2024-10-15T00:00:00Z\",\n  \"streak_continued\": true,\n  \"replies\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8000/good-deeds/670e267dde13a6d7e3576c55"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete A Good Deed",
+			"id": "1f645cae-9cca-43e0-be00-b0a00350a264",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:8000/good-deeds/670e267dde13a6d7e3576c55"
+			},
+			"response": []
+		}
+	]
+}
