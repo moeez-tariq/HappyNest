@@ -114,7 +114,7 @@ params = {
 
 # # Define lists of countries and cities
 # country = "GB"
-
+#city="London"
 
 # params = {
 #     "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
