@@ -82,8 +82,26 @@ def get_top_stories(params, headers, n_top_stories=False):
             break
 
     return fetched_stories
+from difflib import SequenceMatcher
+
+# Function to calculate similarity
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+
+# Function to remove duplicates based on a given threshold
+def remove_duplicates(stories, threshold=0.5):
+    unique_stories = []
+    seen_titles = []
+
+    for story in stories:
+        title = story['title']
+        if not any(similar(title, seen_title) > threshold for seen_title in seen_titles):
+            unique_stories.append(story)
+            seen_titles.append(title)
+    return unique_stories
+
 headers = get_auth_header(username, password, AppID)
-city = "London"  # You can change this to any city you want
+city = "Chennai"  # You can change this to any city you want
 
 params = {
     "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
@@ -108,5 +126,9 @@ params = {
 # }
 
 stories = get_top_stories(params, headers, 100)
-for i in range(5):
-    print(i, stories[i]['title'], end='\n')
+# Remove duplicates with the threshold of 50%
+deduplicated_stories = remove_duplicates(stories, threshold=0.5)
+
+# Print the deduplicated stories
+for i, story in enumerate(deduplicated_stories[:5]):
+    print(i, story['title'])
