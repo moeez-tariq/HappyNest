@@ -15,18 +15,37 @@ url = 'https://api.aylien.com/v6/news/stories?aql=entities:({{surface_forms.text
 response = requests.get(url, headers=headers)
 responses = response.json()
 
-# Use a set to store unique titles
-unique_titles = set()
+def similar_titles(title1, title2, threshold=0.5):
+    # Convert titles to sets of words
+    words1 = set(title1.lower().split())
+    words2 = set(title2.lower().split())
+    
+    # Calculate overlap
+    common_words = words1.intersection(words2)
+    total_words = max(len(words1), len(words2))
+    
+    # Calculate similarity ratio
+    similarity = len(common_words) / total_words
+    return similarity > threshold
 
-# Print only unique titles with numbering
+# Use a list to maintain order and check for duplicates
+unique_titles = []
 count = 1
-for story in responses['stories']:
-    title = story['title']
-    if title not in unique_titles:
-        print(f"{count}. {title}")
-        unique_titles.add(title)
-        count += 1
 
+for story in responses['stories']:
+    title = story['title'].strip()
+    is_duplicate = False
+    
+    # Check against existing titles
+    for existing_title in unique_titles:
+        if similar_titles(title, existing_title):
+            is_duplicate = True
+            break
+    
+    if not is_duplicate:
+        print(f"{count}. {title}")
+        unique_titles.append(title)
+        count += 1
 # import requests
 # import time
 # import requests
