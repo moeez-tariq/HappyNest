@@ -2,11 +2,13 @@ from fastapi import FastAPI, HTTPException
 from typing import List, Dict
 import requests
 import os
+from dotenv import load_dotenv
 
 app = FastAPI()
+load_dotenv()
 
-API_ENDPOINT = "https://basil-ahmed.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-API_KEY = "4pxcDXzlXD7iOXPehEormDW4ih2vamQ7ufkQ0Xq7WsSZ8gcq71hiJQQJ99AKACYeBjFXJ3w3AAABACOGW3Zj"
+API_ENDPOINT = os.getenv("API_ENDPOINT")
+API_KEY = os.getenv("API_KEY")
 
 headers = {
     "Content-Type": "application/json",
