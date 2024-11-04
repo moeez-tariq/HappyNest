@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
@@ -61,22 +61,22 @@ class NewsArticle(BaseModel):
     published_at: Optional[datetime] = datetime.now()
     source: Optional[str]
 
+class Reply(BaseModel):
+    id: Optional[str] = Field(None, alias="_id")
+    deed_id: str
+    user_id: str
+    content: str
+    created_at: Optional[datetime] = datetime.now()
+    
 class GoodDeed(BaseModel):
-    id: Optional[str] = None # Add this so id displays in response
-    user_id: str  # Assumes this will be ObjectId in the database, but str here
+    id: Optional[str] = None
+    user_id: str
     title: Optional[str]
     location: Optional[Location]
     description: str
     completed_at: Optional[datetime] = datetime.now()
     streak_continued: Optional[bool] = False
-    replies: List[str] = []  # List of reply IDs
-
-class Reply(BaseModel):
-    id: Optional[str] = None # Add this so id displays in response
-    deed_id: str  # Assumes this will be ObjectId in the database
-    user_id: str
-    content: str
-    created_at: Optional[datetime] = datetime.now()
+    replies: List[Reply] = []
 
 # Helper function to handle ObjectId conversion
 def str_to_objectid(id_str: str) -> ObjectId:
