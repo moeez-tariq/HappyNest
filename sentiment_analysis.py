@@ -16,7 +16,7 @@ headers = {
 }
 
 def analyze_sentiment(text: str) -> str:
-    # Use the chat format for Azure OpenAI API
+
     messages = [
         {"role": "system", "content": "You are a helpful assistant that performs sentiment analysis."},
         {"role": "user", "content": f"Analyze the sentiment of this text and return just one word, 'positive' if it's happy or positive, else return 'negative' if it's sad or dangerous otherwise 'neutral':\n\n{text}"}
