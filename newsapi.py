@@ -62,8 +62,8 @@ params = {
     'earliest_story.end': '2023-09-01T23:59:59Z',
     'latest_story.start': '2023-09-14T00:00:00Z',
     'latest_story.end': '2023-09-14T23:59:59Z',
-    'location.country': 'UK',
-    # 'location.city': 'New York City' 
+    'location.country': 'US',
+
 }
 
 clusters = get_clusters(params, headers)
