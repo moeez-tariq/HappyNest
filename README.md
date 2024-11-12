@@ -39,7 +39,7 @@ For ease of grading, you may consider the endpoints related to the `News` collec
 
 - Install required Python libraries:
   ```bash
-  pip install requirements.txt
+  pip install -r requirements.txt
   ```
 
 Now, you should have access to our MongoDB database which has sample data created from the sample_db.py file.
