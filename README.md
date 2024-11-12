@@ -2,10 +2,10 @@
 We have implemented the first version of our app! Right now, the application is able to get news that is from your nearest city and display it to you.
 
 The relevant routes are:
-/api/news/fetch
-* Gets news based on city data from our outside APIs and adds any new articles to our database
-/api/news/city=[city name]
-* Gets relevant news from our database for the specific city provided (the news may have just been added by the fetch call)
+* /api/news/fetch
+  * Gets news based on city data from our outside APIs and adds any new articles to our database
+* /api/news/city=[city name]
+  * Gets relevant news from our database for the specific city provided (the news may have just been added by the fetch call)
 
 Please see below for setup instructions in "Instructions to Set Up and Run the Application"
 
