@@ -991,5 +991,5 @@ if __name__ == "__main__":
     # delete_all_good_deeds()
     # delete_all_replies()
 
-    add_sample_replies()
+    # add_sample_replies()
     main()

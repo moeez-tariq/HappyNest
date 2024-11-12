@@ -1,9 +1,3 @@
-# 2
-# _
-# _
-# .
-
-
 import requests
 import time
 import requests
@@ -101,7 +95,7 @@ def remove_duplicates(stories, threshold=0.5):
     return unique_stories
 
 headers = get_auth_header(username, password, AppID)
-city = "Chennai"  # You can change this to any city you want
+city = "New York"  # You can change this to any city you want
 
 params = {
     "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
@@ -130,5 +124,22 @@ stories = get_top_stories(params, headers, 100)
 deduplicated_stories = remove_duplicates(stories, threshold=0.5)
 
 # Print the deduplicated stories
-for i, story in enumerate(deduplicated_stories[:5]):
-    print(i, story['title'])
+for i, story in enumerate(deduplicated_stories[:10]):
+    news_data = {
+        "title": story["title"],
+        "content": story["body"],
+        "location": {
+            "city": city,
+            "state": "New York",
+            "country": "United States",
+            "coordinates": {
+                "lat": 40.7128,
+                "lon": -74.0060
+            }
+        },
+        "sentiment": story["sentiment"]["body"]["polarity"],
+        "published_at": story["published_at"],
+        "source": story["source"]["name"]
+    }
+    print(news_data)
+    break
