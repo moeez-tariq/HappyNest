@@ -7,6 +7,8 @@ The relevant routes are:
 /api/news/city=[city name]
 * Gets relevant news from our database for the specific city provided (the news may have just been added by the fetch call)
 
+Please see below for setup instructions in "Instructions to Set Up and Run the Application"
+
 # HappyNest: Week 6
 
 We have used **FastAPI** and **MongoDB** to create the API for our HappyNest application. There are four collections to take note of:
@@ -30,6 +32,9 @@ For ease of grading, you may consider the endpoints related to the `News` collec
 - Set up the environment and Store your MongoDB URI in an `.env` file with the following content:
   ```
   MONGODB_URI=<your_mongo_uri>
+  AYLIEN_USERNAME=<your_aylien_usrname>
+  AYLIEN_PASSWORD=<your_aylien_password>
+  AYLIEN_APP_ID=<your_aylien_app_id>
   ```
 
 - Install required Python libraries:
