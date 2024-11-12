@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
@@ -11,6 +12,7 @@ import requests
 from pprint import pprint
 from difflib import SequenceMatcher
 
+
 # Load environment variables
 load_dotenv()
 
@@ -20,6 +22,19 @@ PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
 
 app = FastAPI()
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # MongoDB connection setup
 MONGODB_URI = os.getenv('MONGODB_URI')
@@ -46,10 +61,10 @@ except Exception as e:
 
 # Models
 class Location(BaseModel):
-    city: str
-    state: str
-    country: str
-    coordinates: Dict[str, float]
+    city: Optional[str]
+    state: Optional[str]
+    country: Optional[str]
+    coordinates: Optional[Dict[str, float]]
 
 class User(BaseModel):
     id: Optional[str] = None # Add this so id displays in response
@@ -62,12 +77,12 @@ class User(BaseModel):
     created_at: Optional[datetime] = datetime.now()
 
 class NewsArticle(BaseModel):
-    id: Optional[str] = None # Add this so id displays in response
-    title: str
-    content: str
+    id: Optional[str] #= None # Add this so id displays in response
+    title: Optional[str]
+    content: Optional[str]
     location: Optional[Location]
-    sentiment: str
-    published_at: Optional[datetime] = datetime.now()
+    sentiment: Optional[str]
+    published_at: Optional[datetime] #= datetime.now()
     source: Optional[str]
 
 class Reply(BaseModel):
@@ -292,13 +307,26 @@ async def create_news(news: NewsArticle):
     result = news_collection.insert_one(news_data)
     return {"id": str(result.inserted_id)}
 
-@app.get("/api/news/", response_model=List[NewsArticle])
+@app.get("/api/news/") # response_model=List[NewsArticle])
 async def get_all_news():
     news_articles = list(news_collection.find())
     for article in news_articles:
         article["id"] = str(article["_id"])
         del article["_id"]
-    return news_articles
+    return {"data": news_articles}
+
+@app.get("/api/news/city={name}")
+async def home(name:str):
+    news_articles = list(news_collection.find({"location.city": name}))
+    for news_article in news_articles:
+        if news_article:
+            news_article["id"] = str(news_article["_id"])
+            del news_article["_id"]
+        else:
+            raise HTTPException(status_code=404, detail="News article not found")
+    return {"data":news_articles}
+    
+
 
 @app.get("/api/news/fetch", response_model=List[NewsArticle])
 async def fetch_news():
@@ -434,8 +462,3 @@ async def delete_reply(reply_id: str):
     if delete_result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Reply not found")
     return {"detail": "Reply deleted successfully"}
-
-
-@app.get("/")
-async def home():
-    return {"message": "Welcome to the backend of HappyNest."}
