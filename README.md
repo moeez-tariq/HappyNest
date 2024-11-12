@@ -1,3 +1,12 @@
+# HappyNest: Week 9
+We have implemented the first version of our app! Right now, the application is able to get news that is from your nearest city and display it to you.
+
+The relevant routes are:
+/api/news/fetch
+* Gets news based on city data from our outside APIs and adds any new articles to our database
+/api/news/city=[city name]
+* Gets relevant news from our database for the specific city provided (the news may have just been added by the fetch call)
+
 # HappyNest: Week 6
 
 We have used **FastAPI** and **MongoDB** to create the API for our HappyNest application. There are four collections to take note of:
