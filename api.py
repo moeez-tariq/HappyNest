@@ -11,6 +11,7 @@ import time
 import requests
 from pprint import pprint
 from difflib import SequenceMatcher
+from fastapi.responses import RedirectResponse
 
 
 # Load environment variables
@@ -350,9 +351,13 @@ async def fetch_news():
         
         # Return the list of positive news articles, or a default message if no positive news
         if positive_news:
-            return positive_news
+            # store the positive news articles in the database
+            for news_article in positive_news:
+                print("Added article to database")
+                news_collection.insert_one(news_article)
+            return RedirectResponse(url=f"/api/news/city={city}")
         else:
-            return []  # Or you can return a custom message if you prefer
+            return []
 
     except Exception as e:
         return {"error": str(e)}

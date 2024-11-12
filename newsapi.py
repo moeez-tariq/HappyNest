@@ -95,7 +95,7 @@ def remove_duplicates(stories, threshold=0.5):
     return unique_stories
 
 headers = get_auth_header(username, password, AppID)
-city = "New York"  # You can change this to any city you want
+city = "New York" 
 
 params = {
     "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
