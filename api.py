@@ -311,7 +311,7 @@ async def home(name:str):
 async def fetch_news():
     try:
         headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
-        city = "New York"
+        city = "Chennai"
 
         params = {
             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",

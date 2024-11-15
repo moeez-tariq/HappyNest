@@ -196,7 +196,18 @@ def add_news():
         "published_at": datetime.utcnow(),
         "source": input("Enter news source: ")
     }
-
+    try:
+        # First check if similar article exists
+        existing_article = news.find_one({
+            "title": title,
+            "content": content
+        })
+        
+        if existing_article:
+            print("Error: A similar article already exists in the database.")
+            return
+    except pymongo.errors.DuplicateKeyError:
+        print("Error: This article already exists in the database.")
     try:
         result = news.insert_one(news_article)
         print(f"News article added with ID: {result.inserted_id}")

@@ -2,13 +2,12 @@ import requests
 import time
 import requests
 from pprint import pprint
-username = "hj2342@nyu.edu"
-password = "nirESV96Te!$6Ar"
-AppID = "340a6381"
+# Access environment variables
+USERNAME = os.getenv("AYLIEN_USERNAME")
+PASSWORD = os.getenv("AYLIEN_PASSWORD")
+APP_ID = os.getenv("AYLIEN_APP_ID")
 
-
-
-def get_auth_header(username, password, appid):
+def get_auth_header(USERNAME, PASSWORD, APP_ID):
     # Generate the authorization header for making requests to the Aylien API.
 
     token = requests.post('https://api.aylien.com/v1/oauth/token', auth=(username, password), data={'grant_type': 'password'})
