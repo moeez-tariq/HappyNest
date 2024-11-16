@@ -12,7 +12,8 @@ import requests
 from pprint import pprint
 from difflib import SequenceMatcher
 from fastapi.responses import RedirectResponse
-
+import requests
+from typing import List, Dict
 
 # Load environment variables
 load_dotenv()
@@ -21,7 +22,8 @@ load_dotenv()
 USERNAME = os.getenv("AYLIEN_USERNAME")
 PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
-
+API_ENDPOINT = os.getenv("API_ENDPOINT")
+API_KEY = os.getenv("API_KEY")  
 app = FastAPI()
 origins = [
     "http://localhost",
@@ -174,7 +176,71 @@ def get_top_stories(params, headers, n_top_stories=False):
             pprint(e)
             break
     return fetched_stories
+headers = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
+def is_political(text: str) -> bool:
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant that determines if text is related to politics."},
+        {"role": "user", "content": f"Is this text related to politics? Answer with just 'yes' or 'no':\n\n{text}"}
+    ]
+    
+    data = {
+        "model": "gpt-3.5-turbo", 
 
+        "messages": messages,
+        "max_tokens": 10,
+        "temperature": 0.3,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "stop": None,
+        "stream": False
+    }
+
+    response = requests.post(API_ENDPOINT, headers=headers, json=data)
+    
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=f"Error from Azure OpenAI API: {response.text}")
+    
+    result = response.json()
+    is_political = result["choices"][0]["message"]["content"].strip().lower() == "yes"
+    return is_political
+
+def analyze_sentiment(text: str) -> str:
+
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant that performs sentiment analysis."},
+        {"role": "user", "content": f"Analyze the sentiment of this text and return just one word, 'positive' if it's happy or positive, else return 'negative' if it's sad or dangerous otherwise 'neutral':\n\n{text}"}
+
+    ]
+    
+    data = {
+        "model": "gpt-3.5-turbo",  
+
+        "messages": messages,
+        "max_tokens":800,  
+        "temperature":0.7,  
+        "top_p":0.95,  
+        "frequency_penalty":0,  
+        "presence_penalty":0,  
+        "stop":None,  
+        "stream":False  
+    }
+
+    response = requests.post(API_ENDPOINT, headers=headers, json=data)
+    
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=f"Error from Azure OpenAI API: {response.text}")
+        
+    
+    result = response.json()
+    sentiment = result["choices"][0]["message"]["content"].strip().lower()
+    if sentiment == "positive" and is_political(text):
+        return "neutral"
+    
+    return sentiment
 # User Endpoints
 @app.post("/api/users/")
 async def create_user(user: User):
@@ -311,7 +377,7 @@ async def home(name:str):
 async def fetch_news():
     try:
         headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
-        city = "Chennai"
+        city = "Dallas"
 
         params = {
             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
@@ -344,14 +410,15 @@ async def fetch_news():
                 "published_at": datetime.utcnow(),
                 "source": story["source"]["name"]
             }
+                 
+            # Perform sentiment analysis
+            sentiment = analyze_sentiment(news_data["content"])
+            news_data["sentiment"] = sentiment
             
-            # If the sentiment is positive, add it to the positive_news list
-            if news_data["sentiment"] == "positive":
+            if sentiment == "positive":
                 positive_news.append(news_data)
         
-        # Return the list of positive news articles, or a default message if no positive news
         if positive_news:
-            # store the positive news articles in the database
             for news_article in positive_news:
                 print("Added article to database")
                 news_collection.insert_one(news_article)
@@ -360,7 +427,23 @@ async def fetch_news():
             return []
 
     except Exception as e:
-        return {"error": str(e)}
+            return {"error": str(e)}
+    #         # If the sentiment is positive, add it to the positive_news list
+    #         if news_data["sentiment"] == "positive":
+    #             positive_news.append(news_data)
+        
+    #     # Return the list of positive news articles, or a default message if no positive news
+    #     if positive_news:
+    #         # store the positive news articles in the database
+    #         for news_article in positive_news:
+    #             print("Added article to database")
+    #             news_collection.insert_one(news_article)
+    #         return RedirectResponse(url=f"/api/news/city={city}")
+    #     else:
+    #         return []
+
+    # except Exception as e:
+    #     return {"error": str(e)}
 
     
 

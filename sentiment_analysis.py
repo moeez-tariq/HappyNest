@@ -12,7 +12,7 @@ API_KEY = os.getenv("API_KEY")
 
 headers = {
     "Content-Type": "application/json",
-    "api-key": API_KEY
+    "Authorization": f"Bearer {API_KEY}"
 }
 def is_political(text: str) -> bool:
     messages = [
@@ -21,6 +21,8 @@ def is_political(text: str) -> bool:
     ]
     
     data = {
+        "model": "gpt-3.5-turbo", 
+
         "messages": messages,
         "max_tokens": 10,
         "temperature": 0.3,
@@ -49,6 +51,8 @@ def analyze_sentiment(text: str) -> str:
     ]
     
     data = {
+        "model": "gpt-3.5-turbo",  
+
         "messages": messages,
         "max_tokens":800,  
         "temperature":0.7,  
