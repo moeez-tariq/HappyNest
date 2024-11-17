@@ -182,7 +182,7 @@ headers = {
 }
 def is_political(text: str) -> bool:
     messages = [
-        {"role": "system", "content": "You are a helpful assistant that determines if text is related to politics."},
+        {"role": "system", "content": "You are a helpful assistant that determines if text is related to politics and you just answer in one word."},
         {"role": "user", "content": f"Is this text related to politics? Answer with just 'yes' or 'no':\n\n{text}"}
     ]
     
@@ -241,6 +241,7 @@ def analyze_sentiment(text: str) -> str:
         return "neutral"
     
     return sentiment
+
 # User Endpoints
 @app.post("/api/users/")
 async def create_user(user: User):

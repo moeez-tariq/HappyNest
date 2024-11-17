@@ -2,12 +2,14 @@ import requests
 import time
 import requests
 from pprint import pprint
+import os   
+
 # Access environment variables
 USERNAME = os.getenv("AYLIEN_USERNAME")
 PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
 
-def get_auth_header(USERNAME, PASSWORD, APP_ID):
+def get_auth_header(username, password, appid):
     # Generate the authorization header for making requests to the Aylien API.
 
     token = requests.post('https://api.aylien.com/v1/oauth/token', auth=(username, password), data={'grant_type': 'password'})
@@ -93,7 +95,7 @@ def remove_duplicates(stories, threshold=0.5):
             seen_titles.append(title)
     return unique_stories
 
-headers = get_auth_header(username, password, AppID)
+headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
 city = "New York" 
 
 params = {
