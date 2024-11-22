@@ -28,6 +28,8 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "http://localhost:8080"
+
 ]
 
 app.add_middleware(
@@ -350,11 +352,15 @@ async def delete_good_deed(deed_id: str):
 # News Article Endpoints
 @app.post("/api/news/")
 async def create_news(news: NewsArticle):
-    news_data = news.dict()
-    news_data["published_at"] = datetime.now()
-    result = news_collection.insert_one(news_data)
-    return {"id": str(result.inserted_id)}
-
+    try:
+        news_data = news.dict()
+        print(f"Received news data: {news.dict()}")
+        news_data["published_at"] = datetime.now()
+        result = news_collection.insert_one(news_data)
+        return {"id": str(result.inserted_id)}
+    except Exception as e:
+        print(f"Error creating news: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 @app.get("/api/news/") # response_model=List[NewsArticle])
 async def get_all_news():
     news_articles = list(news_collection.find())
@@ -374,12 +380,93 @@ async def home(name:str):
             raise HTTPException(status_code=404, detail="News article not found")
     return {"data":news_articles}
 
-@app.get("/api/news/fetch", response_model=List[NewsArticle])
-async def fetch_news():
-    try:
-        headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
-        city = "Dallas"
+# @app.get("/api/news/fetch", response_model=List[NewsArticle])
+# async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
+#     try:
+#         if lat is None or lon is None:
+#             # If lat or lon is not provided, use a default city
+#             city = "Boston"
+#         else:
+#             # Use the coordinates to get the city name
+#             url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
+#             response = requests.get(url, headers={'User-Agent': 'YourApp/1.0'})
+#             data = response.json()
+#             if 'address' in data:
+#                 city = data['address'].get('city') or data['address'].get('town') or data['address'].get('village')
+#                 if ('City of' in city):
+#                     city=city[8:]
+                 
+            
 
+#             else:
+#                 city = "New York"  # Default to New York if city can't be determined
+
+#         headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
+
+#         params = {
+#             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
+#             "language": "(en)",
+#             "entities": '{{element:title AND surface_forms:"' + city + '" AND type:("Location", "City")}}',
+#             "sort_by": "published_at",
+#             "per_page": 100,
+#         }
+
+#         stories = get_top_stories(params, headers, 100)
+#         # Remove duplicates with the threshold of 50%
+#         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
+
+#         positive_news = []  # List to store positive news articles
+        
+#         for story in deduplicated_stories:
+#             news_data = {
+#                 "title": story["title"],
+#                 "content": story["body"],
+#                 "location": {
+#                     "city": city,
+#                     "state": "New York",
+#                     "country": "United States",
+#                     "coordinates": {
+#                         "latitude": float(40.7128),
+#                         "longitude": float(-74.0060)
+#                     }
+#                 },
+#                 "sentiment": story["sentiment"]["body"]["polarity"],
+#                 "published_at": datetime.utcnow(),
+#                 "source": story["source"]["name"]
+#             }
+                 
+#             # Perform sentiment analysis
+#             sentiment = analyze_sentiment(news_data["content"])
+#             news_data["sentiment"] = sentiment
+            
+#             if sentiment == "positive":
+#                 positive_news.append(news_data)
+        
+#         if positive_news:
+#             for news_article in positive_news:
+#                 print("Added article to database")
+#                 news_collection.insert_one(news_article)
+#             return RedirectResponse(url=f"/api/news/fetch?lat=${lat}&lon=${lon}")
+#         else:
+#             return []
+
+#     except Exception as e:
+#             return {"error": str(e)}
+
+@app.get("/api/news/fetch", response_model=List[NewsArticle])
+async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
+    try:
+        city = "New York"  # Default city
+        if lat is not None and lon is not None:
+            url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
+            response = requests.get(url, headers={'User-Agent': 'YourApp/1.0'})
+            data = response.json()
+            if 'address' in data:
+                city = data['address'].get('city') or data['address'].get('town') or data['address'].get('village')
+                if city and 'City of' in city:
+                    city = city[8:]
+      
+        headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
         params = {
             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
             "language": "(en)",
@@ -389,46 +476,50 @@ async def fetch_news():
         }
 
         stories = get_top_stories(params, headers, 100)
-        # Remove duplicates with the threshold of 50%
+        if not stories:
+            return []
+            
         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
-
-        positive_news = []  # List to store positive news articles
+        positive_news = []
         
         for story in deduplicated_stories:
-            news_data = {
-                "title": story["title"],
-                "content": story["body"],
-                "location": {
-                    "city": city,
-                    "state": "New York",
-                    "country": "United States",
-                    "coordinates": {
-                        "latitude": float(40.7128),
-                        "longitude": float(-74.0060)
-                    }
-                },
-                "sentiment": story["sentiment"]["body"]["polarity"],
-                "published_at": datetime.utcnow(),
-                "source": story["source"]["name"]
-            }
-                 
-            # Perform sentiment analysis
-            sentiment = analyze_sentiment(news_data["content"])
-            news_data["sentiment"] = sentiment
-            
-            if sentiment == "positive":
-                positive_news.append(news_data)
+            try:
+                news_data = {
+                    "title": story["title"],
+                    "content": story["body"],
+                    "location": {
+                        "city": city,
+                        "state": "Unknown",
+                        "country": "Unknown",
+                        "coordinates": {
+                            "latitude": lat if lat is not None else 0,
+                            "longitude": lon if lon is not None else 0
+                        }
+                    },
+                    "published_at": datetime.utcnow(),
+                    "source": story["source"]["name"],
+                    "id": str(ObjectId())  # Generate a unique ID
+                }
+                
+                sentiment = analyze_sentiment(news_data["content"])
+                news_data["sentiment"] = sentiment
+                
+                if sentiment == "positive":
+                    positive_news.append(news_data)
+                    news_collection.insert_one(news_data)
+                    
+            except Exception as story_error:
+                print(f"Error processing story: {story_error}")
+                continue
+                
+        return positive_news
         
-        if positive_news:
-            for news_article in positive_news:
-                print("Added article to database")
-                news_collection.insert_one(news_article)
-            return RedirectResponse(url=f"/api/news/city={city}")
-        else:
-            return []
-
     except Exception as e:
-            return {"error": str(e)}
+        print(f"Fetch news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
     #         # If the sentiment is positive, add it to the positive_news list
     #         if news_data["sentiment"] == "positive":
     #             positive_news.append(news_data)
