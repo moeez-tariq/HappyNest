@@ -478,12 +478,11 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
         stories = get_top_stories(params, headers, 100)
         if not stories:
             return []
-            
         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
         positive_news = []
         
         for story in deduplicated_stories:
-            try:
+            try:   
                 news_data = {
                     "title": story["title"],
                     "content": story["body"],
@@ -497,7 +496,7 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
                         }
                     },
                     "published_at": datetime.utcnow(),
-                    "source": story["source"]["name"],
+                    "source": story["links"]["permalink"],
                     "id": str(ObjectId())  # Generate a unique ID
                 }
                 

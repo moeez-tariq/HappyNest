@@ -140,7 +140,7 @@ for i, story in enumerate(deduplicated_stories[:10]):
         },
         "sentiment": story["sentiment"]["body"]["polarity"],
         "published_at": story["published_at"],
-        "source": story["source"]["name"]
+        "source": story["links"]["permalink"]
     }
     print(news_data)
     break
