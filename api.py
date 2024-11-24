@@ -305,12 +305,14 @@ async def get_all_good_deeds():
     for deed in good_deeds:
         deed["id"] = str(deed["_id"])
         del deed["_id"]
-        # Fetch associated replies for each good deed
-        reply_ids = deed.get("replies", [])
-        deed["replies"] = [
-            {**reply, "_id": str(reply["_id"])}
-            for reply in replies_collection.find({"_id": {"$in": reply_ids}})
-        ]
+        # Convert reply IDs to actual reply objects
+        if "replies" in deed:
+            reply_ids = [str_to_objectid(rid) for rid in deed["replies"]]
+            deed["replies"] = list(replies_collection.find({"_id": {"$in": reply_ids}}))
+            # Clean up reply objects
+            for reply in deed["replies"]:
+                reply["id"] = str(reply["_id"])
+                del reply["_id"]
     return good_deeds
 
 @app.get("/api/good-deeds/{deed_id}", response_model=GoodDeed)
@@ -635,3 +637,47 @@ async def delete_reply(reply_id: str):
     if delete_result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Reply not found")
     return {"detail": "Reply deleted successfully"}
+
+@app.get("/api/leaderboard/")
+async def get_leaderboard():
+    # First get deed counts
+    pipeline = [
+        {
+            "$group": {
+                "_id": "$user_id",
+                "deed_count": {"$sum": 1}
+            }
+        },
+        {
+            "$sort": {"deed_count": -1}
+        },
+        {
+            "$limit": 10
+        }
+    ]
+    
+    deed_counts = list(good_deeds_collection.aggregate(pipeline))
+    
+    # Get user details for each user_id
+    leaders = []
+    for deed_count in deed_counts:
+        user_id = deed_count["_id"]
+        user = users_collection.find_one({"id": user_id})
+        
+        if user:
+            leaders.append({
+                "user_id": user_id,
+                "deed_count": deed_count["deed_count"],
+                "name": user["name"],
+                "email": user["email"],
+                "streak": user["streak"],
+                "mood": user["mood"]
+            })
+        else: # let's get rid of this after we've purged all the fake data
+            leaders.append({
+                "user_id": "anonymous user",
+                "deed_count": deed_count["deed_count"],
+                "name": "Anonymous User",
+            })
+    
+    return leaders
