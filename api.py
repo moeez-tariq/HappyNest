@@ -22,8 +22,8 @@ load_dotenv()
 USERNAME = os.getenv("AYLIEN_USERNAME")
 PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
-API_ENDPOINT = os.getenv("API_ENDPOINT")
-API_KEY = os.getenv("API_KEY")  
+OPEN_AI_API_ENDPOINT = os.getenv("OPEN_AI_API_ENDPOINT")
+OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")  
 app = FastAPI()
 origins = [
     "http://localhost",
@@ -180,7 +180,7 @@ def get_top_stories(params, headers, n_top_stories=False):
     return fetched_stories
 headers = {
     "Content-Type": "application/json",
-    "Authorization": f"Bearer {API_KEY}"
+    "Authorization": f"Bearer {OPEN_AI_API_KEY}"
 }
 def is_political(text: str) -> bool:
     messages = [
@@ -201,7 +201,7 @@ def is_political(text: str) -> bool:
         "stream": False
     }
 
-    response = requests.post(API_ENDPOINT, headers=headers, json=data)
+    response = requests.post(OPEN_AI_API_ENDPOINT, headers=headers, json=data)
     
     if response.status_code != 200:
         raise HTTPException(status_code=response.status_code, detail=f"Error from Azure OpenAI API: {response.text}")
@@ -231,7 +231,7 @@ def analyze_sentiment(text: str) -> str:
         "stream":False  
     }
 
-    response = requests.post(API_ENDPOINT, headers=headers, json=data)
+    response = requests.post(OPEN_AI_API_ENDPOINT, headers=headers, json=data)
     
     if response.status_code != 200:
         raise HTTPException(status_code=response.status_code, detail=f"Error from Azure OpenAI API: {response.text}")

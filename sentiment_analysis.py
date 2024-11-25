@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 app = FastAPI()
 load_dotenv()
 
-API_ENDPOINT = os.getenv("API_ENDPOINT")
-API_KEY = os.getenv("API_KEY")
+API_ENDPOINT = os.getenv("OPEN_AI_API_ENDPOINT")
+API_KEY = os.getenv("OPEN_AI_API_KEY")
 
 headers = {
     "Content-Type": "application/json",
