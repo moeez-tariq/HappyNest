@@ -448,7 +448,37 @@ def delete_document(collection):
     except pymongo.errors.PyMongoError as e:
         print(f"An error occurred while deleting the document from {collection.name}: {e}")
 
-# Main function to display menu
+def remove_duplicate_news_by_title():
+    try:
+        # Use aggregation to group by title and find duplicates
+        pipeline = [
+            {"$group": {
+                "_id": "$title",
+                "ids": {"$push": "$_id"},
+                "count": {"$sum": 1}
+            }},
+            {"$match": {"count": {"$gt": 1}}}  # Only keep duplicates
+        ]
+
+        duplicates = list(news.aggregate(pipeline))
+
+        if not duplicates:
+            print("No duplicate news articles found.")
+            return
+
+        # Remove duplicates, keeping one document for each title
+        for duplicate in duplicates:
+            ids = duplicate["ids"]
+            # Keep the first ID and remove others
+            ids_to_remove = ids[1:]
+            result = news.delete_many({"_id": {"$in": ids_to_remove}})
+            print(f"Removed {result.deleted_count} duplicate(s) for title: '{duplicate['_id']}'.")
+
+        print("Duplicate removal process completed.")
+    except pymongo.errors.PyMongoError as e:
+        print(f"An error occurred while removing duplicate news articles: {e}")
+
+
 def main():
     while True:
         print("\nHappyNest Application")
@@ -459,7 +489,7 @@ def main():
         print("5. View all users")
         print("6. View all good deeds")
         print("7. View all news articles")
-        print("8. View all replies")  # New option added
+        print("8. View all replies")
         print("9. Update a user")
         print("10. Update a good deed")
         print("11. Update a news article")
@@ -468,9 +498,10 @@ def main():
         print("14. Delete a good deed")
         print("15. Delete a news article")
         print("16. Delete a reply")
-        print("17. Exit")  # Updated option number
+        print("17. Remove duplicate news by title")  # New option
+        print("18. Exit")  # Updated option number
 
-        choice = input("Enter your choice (1-17): ")  # Updated range
+        choice = input("Enter your choice (1-18): ")
 
         if choice == '1':
             add_user()
@@ -486,8 +517,8 @@ def main():
             view_all(good_deeds)
         elif choice == '7':
             view_all(news)
-        elif choice == '8':  
-            view_replies() 
+        elif choice == '8':
+            view_replies()
         elif choice == '9':
             update_document(users)
         elif choice == '10':
@@ -504,13 +535,16 @@ def main():
             delete_document(news)
         elif choice == '16':
             delete_reply()
-        elif choice == '17':  
+        elif choice == '17':
+            remove_duplicate_news_by_title()
+        elif choice == '18':
             break
         else:
             print("Invalid choice. Please try again.")
 
     client.close()
     print("Goodbye!")
+
 
 def add_sample_users():
     """Function to insert sample users into the MongoDB collection."""
