@@ -234,7 +234,7 @@ def analyze_sentiment(text: str) -> str:
     response = requests.post(OPEN_AI_API_ENDPOINT, headers=headers, json=data)
     
     if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=f"Error from Azure OpenAI API: {response.text}")
+        raise HTTPException(status_code=response.status_code, detail=f"Error from OpenAI API: {response.text}")
         
     
     result = response.json()
