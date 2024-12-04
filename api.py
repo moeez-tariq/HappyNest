@@ -607,6 +607,11 @@ async def get_leaderboard():
     
     return leaders
 
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
+    app.run(host="0.0.0.0", port=port)
+
 # @app.get("/api/news/fetch", response_model=List[NewsArticle])
 # async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
 #     try:
