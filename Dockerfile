@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy all backend files
 COPY . .
 
-# Expose port
+# Expose port 8080
 # EXPOSE 8080
 
 # Start FastAPI server (this should be exactly what you do when working locally)

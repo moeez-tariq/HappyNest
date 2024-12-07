@@ -227,8 +227,8 @@ def analyze_sentiment(text: str) -> str:
         "top_p":0.95,  
         "frequency_penalty":0,  
         "presence_penalty":0,  
-        "stop":None,  
-        "stream":False  
+        "stop": None,  
+        "stream": False  
     }
 
     response = requests.post(OPEN_AI_API_ENDPOINT, headers=headers, json=data)
