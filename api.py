@@ -16,6 +16,8 @@ from difflib import SequenceMatcher
 from fastapi.responses import RedirectResponse
 import requests
 from typing import List, Dict
+import random
+
 
 # Load environment variables
 load_dotenv()
@@ -378,19 +380,87 @@ async def create_news(news: NewsArticle):
         print(f"Error creating news: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
-@app.get("/api/news/")
-async def get_all_news():
+
+
+@app.get("/api/news/", response_model=List[NewsArticle])
+async def fetch_news():
     try:
-        news_articles = list(news_collection.find().sort("published_at", -1).limit(100))
-        for article in news_articles:
-            article["id"] = str(article["_id"])
-            del article["_id"]
-        return {"data": news_articles}
+        # List of cities to choose from
+        cities = [
+            "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Boston", "Seattle",
+            "London", "Paris", "Berlin", "Rome", "Madrid", "Barcelona", "Amsterdam", "Vienna", "Zurich",
+            "Tokyo", "Osaka", "Kyoto", "Seoul", "Beijing", "Shanghai", "Hong Kong", "Singapore", 
+            "Sydney", "Melbourne", "Brisbane", "Auckland", "Toronto", "Vancouver", "Montreal", "Ottawa",
+            "Dubai", "Abu Dhabi", "Cairo", "Cape Town", "Lagos", "Nairobi", "Mumbai", "Delhi", "Bangalore",
+            "Mexico City", "Buenos Aires", "Rio de Janeiro", "Sao Paulo", "Lima", "Bogota", "Caracas", 
+            "Jakarta", "Manila", "Kuala Lumpur", "Bangkok", "Ho Chi Minh City", "Seoul", "Jakarta", "Istanbul"
+        ]
+                
+        # Select a number of cities randomly from the list (e.g., 3 cities)
+        selected_cities = random.sample(cities,k=4 )  # Change the number as per your requirement
+        
+        print(f"Fetching news for cities: {selected_cities}")
+
+        all_news = []  # To hold all the news articles
+
+        # Fetch news for each selected city
+        for city in selected_cities:
+            headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
+            params = {
+                "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
+                "language": "(en)",
+                "entities": '{{element:title AND surface_forms:"' + city + '" AND type:("Location", "City")}}',
+                "sort_by": "published_at",
+                "per_page": 11,
+            }
+
+            stories = get_top_stories(params, headers, 11)
+            if not stories:
+                continue  # Skip if no stories are found for this city
+
+            deduplicated_stories = remove_duplicates(stories, threshold=0.5)
+
+            for story in deduplicated_stories:
+                try:
+                    # Construct the news data for each story
+                    news_data = {
+                        "title": story["title"],
+                        "content": story["body"],
+                        "location": {
+                            "city": city,
+                            "state": "Unknown",
+                            "country": "Unknown",
+                            "coordinates": {
+                                "latitude": 0,
+                                "longitude": 0
+                            }
+                        },
+                        "published_at": datetime.utcnow(),
+                        "source": story["links"]["permalink"],
+                        "id": str(ObjectId())  # Generate a unique ID
+                    }
+
+                    # Sentiment analysis
+                    sentiment = analyze_sentiment(news_data["content"])
+                    news_data["sentiment"] = sentiment
+
+                    if sentiment == "positive":
+                        all_news.append(news_data)
+                        news_collection.insert_one(news_data)
+
+                except Exception as story_error:
+                    print(f"Error processing story: {story_error}")
+                    continue
+        random.shuffle(all_news)
+
+        return all_news
+
     except Exception as e:
-        print(f"Error fetching news: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-
+        print(f"Fetch news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
 
 @app.get("/api/news/city={name}")
 async def home(name:str):
