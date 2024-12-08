@@ -3,5 +3,5 @@ pymongo
 fastapi
 pydantic
 pydantic[email]
-uvicorn
+uvicorn[standard]
 requests
