@@ -31,16 +31,15 @@ app = FastAPI()
 
 @app.middleware("http")
 async def redirect_http_to_https(request: Request, call_next):
-    # Check if the request was forwarded as HTTPS
-    forwarded_proto = request.headers.get("x-forwarded-proto")
-    if forwarded_proto == "https":
-        return await call_next(request)
-    
-    # Redirect if it was plain HTTP
-    if request.url.scheme == "http":
+    # Check the "X-Forwarded-Proto" header
+    forwarded_proto = request.headers.get("x-forwarded-proto", None)
+
+    # Redirect only if the "X-Forwarded-Proto" explicitly says "http"
+    if forwarded_proto == "http":
         url = request.url.replace(scheme="https")
         return RedirectResponse(url=str(url))
-    
+
+    # Allow the request to proceed if it's already "https"
     return await call_next(request)
 
 # Add TrustedHostMiddleware
