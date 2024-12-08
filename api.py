@@ -30,14 +30,12 @@ OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 app = FastAPI()
 
 @app.middleware("http")
-async def conditional_redirect(request: Request, call_next):
-    # Only apply redirection to specific paths
-    if request.url.path.startswith("/api/news") and request.url.scheme == "http":
-        # Redirect HTTP to HTTPS
-        url = request.url.replace(scheme="https")
-        return RedirectResponse(url=str(url))
-    
-    # For other paths, process the request normally
+async def redirect_http_to_https(request: Request, call_next):
+    print(f"Request URL: {request.url}")
+    if request.url.scheme == "http" and request.url.path.startswith("/api/news"):
+        https_url = request.url.replace(scheme="https")
+        print(f"Redirecting to {https_url}")
+        return RedirectResponse(url=str(https_url))
     return await call_next(request)
 
 
