@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
@@ -30,14 +31,23 @@ app = FastAPI()
 
 @app.middleware("http")
 async def redirect_http_to_https(request: Request, call_next):
+    # Check if the request was forwarded as HTTPS
+    forwarded_proto = request.headers.get("x-forwarded-proto")
+    if forwarded_proto == "https":
+        return await call_next(request)
+    
+    # Redirect if it was plain HTTP
     if request.url.scheme == "http":
-        # Avoid circular redirects by checking the "X-Forwarded-Proto" header
-        forwarded_proto = request.headers.get("x-forwarded-proto", None)
-        if forwarded_proto == "https":
-            return await call_next(request)
         url = request.url.replace(scheme="https")
         return RedirectResponse(url=str(url))
+    
     return await call_next(request)
+
+# Add TrustedHostMiddleware
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"],  # Change "*" to specific domains in production
+)
 
 origins = [
     "http://localhost",
