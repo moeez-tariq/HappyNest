@@ -16,18 +16,6 @@ from difflib import SequenceMatcher
 from fastapi.responses import RedirectResponse
 import requests
 from typing import List, Dict
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from fastapi.responses import RedirectResponse
-
-class HTTPSRedirectMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        if request.url.scheme == "http":  # Check if request is HTTP
-            # Redirect to the HTTPS version
-            url = request.url._replace(scheme="https")
-            return RedirectResponse(url=str(url))
-        response = await call_next(request)
-        return response
 
 # Load environment variables
 load_dotenv()
@@ -55,9 +43,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Add the HTTPS redirection middleware
-app.add_middleware(HTTPSRedirectMiddleware)
 
 
 # MongoDB connection setup
