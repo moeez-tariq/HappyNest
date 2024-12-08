@@ -31,10 +31,14 @@ app = FastAPI()
 @app.middleware("http")
 async def redirect_http_to_https(request: Request, call_next):
     if request.url.scheme == "http":
+        # Avoid circular redirects by checking the "X-Forwarded-Proto" header
+        forwarded_proto = request.headers.get("x-forwarded-proto", None)
+        if forwarded_proto == "https":
+            return await call_next(request)
         url = request.url.replace(scheme="https")
         return RedirectResponse(url=str(url))
     return await call_next(request)
-    
+
 origins = [
     "http://localhost",
     "http://localhost:3000",
