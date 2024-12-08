@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
@@ -24,7 +25,16 @@ PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
 OPEN_AI_API_ENDPOINT = os.getenv("OPEN_AI_API_ENDPOINT")
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")  
+
 app = FastAPI()
+
+@app.middleware("http")
+async def redirect_http_to_https(request: Request, call_next):
+    if request.url.scheme == "http":
+        url = request.url.replace(scheme="https")
+        return RedirectResponse(url=str(url))
+    return await call_next(request)
+    
 origins = [
     "http://localhost",
     "http://localhost:3000",
