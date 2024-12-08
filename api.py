@@ -380,11 +380,17 @@ async def create_news(news: NewsArticle):
 
 @app.get("/api/news/")
 async def get_all_news():
-    news_articles = list(news_collection.find().sort("published_at", -1).limit(100))
-    for article in news_articles:
-        article["id"] = str(article["_id"])
-        del article["_id"]
-    return {"data": news_articles}
+    try:
+        news_articles = list(news_collection.find().sort("published_at", -1).limit(100))
+        for article in news_articles:
+            article["id"] = str(article["_id"])
+            del article["_id"]
+        return {"data": news_articles}
+    except Exception as e:
+        print(f"Error fetching news: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
 
 @app.get("/api/news/city={name}")
 async def home(name:str):
