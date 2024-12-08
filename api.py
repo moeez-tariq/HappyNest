@@ -31,13 +31,9 @@ app = FastAPI()
 
 @app.middleware("http")
 async def redirect_http_to_https(request: Request, call_next):
-    # Use the scheme and port to determine whether to redirect
-    if request.url.scheme == "http" and request.url.port == 80:
-        # Redirect HTTP requests to HTTPS
-        https_url = request.url.replace(scheme="https", port=443)
-        return RedirectResponse(url=str(https_url))
-    
-    # Process the request normally for HTTPS or non-standard ports
+    if request.url.scheme == "http":
+        url = request.url.replace(scheme="https")
+        return RedirectResponse(url=str(url))
     return await call_next(request)
 
 
