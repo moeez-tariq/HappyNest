@@ -29,22 +29,6 @@ OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 
 app = FastAPI()
 
-@app.middleware("http")
-async def redirect_http_to_https(request: Request, call_next):
-    print(f"Request URL: {request.url}")
-    if request.url.scheme == "http" and request.url.path.startswith("/api/news"):
-        https_url = request.url.replace(scheme="https")
-        print(f"Redirecting to {https_url}")
-        return RedirectResponse(url=str(https_url))
-    return await call_next(request)
-
-
-# Add TrustedHostMiddleware
-app.add_middleware(
-    TrustedHostMiddleware,
-    allowed_hosts=["*"],  # Change "*" to specific domains in production
-)
-
 origins = [
     "http://localhost",
     "http://localhost:3000",
@@ -612,4 +596,4 @@ async def get_leaderboard():
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
-    app.run(host="0.0.0.0", port=port, proxy_headers=True)
+    app.run(host="0.0.0.0", port=port)
