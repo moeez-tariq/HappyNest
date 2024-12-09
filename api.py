@@ -553,16 +553,48 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
             except Exception as story_error:
                 print(f"Error processing story: {story_error}")
                 continue
-                
-        return positive_news
+         
+       # Limit to 10 positive news headlines
+        positive_news = positive_news[:10]
+
+        combined_news_content = (
+            "Welcome to HappyNest Local Radio, your source for uplifting news and positive updates in your area. "
+            "Here are the latest heartwarming stories:\n\n"
+        )
+
+        for article in positive_news:
+            combined_news_content += f"{article['title']}\n\n"
+
+        # Final wrap-up message
+        combined_news_content += (
+            "That concludes today's updates on HappyNest Local Radio. Stay positive, stay informed, and we'll be back soon with more good news!"
+        )
+        # Path to save the generated audio file
+        speech_file_path = Path("audio") / f"local_news_{city.replace(' ', '_')}.mp3"
+        os.makedirs("audio", exist_ok=True)
+
+        # Generate speech using OpenAI TTS
+        response = client2.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=combined_news_content
+        )
+
+        # Save the audio file to the defined path
+        response.stream_to_file(speech_file_path)
+
+        # Return the audio file URL
+        audio_url = f"/audio/{speech_file_path.name}"
+        print(f"Audio file generated: {audio_url}")
         
+        return positive_news
+
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"An error occurred while fetching news: {str(e)}"
         )
-
 
 @app.get("/api/news/{article_id}", response_model=NewsArticle)
 async def get_news_article(article_id: str):
