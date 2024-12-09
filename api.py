@@ -2,22 +2,23 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-import os
-from datetime import datetime
 from typing import Optional, Dict, List
+from datetime import datetime
+from pathlib import Path
+from openai import OpenAI
+from difflib import SequenceMatcher
+import os
+import random
 import time
 import requests
+import pyaudio
+import wave
 from pprint import pprint
-from difflib import SequenceMatcher
-from fastapi.responses import RedirectResponse
-import requests
-from typing import List, Dict
-import random
-
 
 # Load environment variables
 load_dotenv()
@@ -380,12 +381,17 @@ async def create_news(news: NewsArticle):
         print(f"Error creating news: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
+os.makedirs('audio', exist_ok=True)
 
+app.mount("/audio", StaticFiles(directory="audio"), name="audio")
+
+
+
+client2 = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
 @app.get("/api/news/", response_model=List[NewsArticle])
 async def fetch_news():
     try:
-        # List of cities to choose from
         cities = [
             "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Boston", "Seattle",
             "London", "Paris", "Berlin", "Rome", "Madrid", "Barcelona", "Amsterdam", "Vienna", "Zurich",
@@ -393,17 +399,14 @@ async def fetch_news():
             "Sydney", "Melbourne", "Brisbane", "Auckland", "Toronto", "Vancouver", "Montreal", "Ottawa",
             "Dubai", "Abu Dhabi", "Cairo", "Cape Town", "Lagos", "Nairobi", "Mumbai", "Delhi", "Bangalore",
             "Mexico City", "Buenos Aires", "Rio de Janeiro", "Sao Paulo", "Lima", "Bogota", "Caracas", 
-            "Jakarta", "Manila", "Kuala Lumpur", "Bangkok", "Ho Chi Minh City", "Seoul", "Jakarta", "Istanbul"
+            "Jakarta", "Manila", "Kuala Lumpur", "Bangkok", "Ho Chi Minh City", "Istanbul"
         ]
-                
-        # Select a number of cities randomly from the list (e.g., 3 cities)
-        selected_cities = random.sample(cities,k=4 )  # Change the number as per your requirement
         
+        selected_cities = random.sample(cities, k=4)
         print(f"Fetching news for cities: {selected_cities}")
 
-        all_news = []  # To hold all the news articles
+        all_news = []
 
-        # Fetch news for each selected city
         for city in selected_cities:
             headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
             params = {
@@ -416,13 +419,12 @@ async def fetch_news():
 
             stories = get_top_stories(params, headers, 11)
             if not stories:
-                continue  # Skip if no stories are found for this city
+                continue
 
             deduplicated_stories = remove_duplicates(stories, threshold=0.5)
 
             for story in deduplicated_stories:
                 try:
-                    # Construct the news data for each story
                     news_data = {
                         "title": story["title"],
                         "content": story["body"],
@@ -437,21 +439,44 @@ async def fetch_news():
                         },
                         "published_at": datetime.utcnow(),
                         "source": story["links"]["permalink"],
-                        "id": str(ObjectId())  # Generate a unique ID
+                        "id": str(ObjectId())
                     }
 
-                    # Sentiment analysis
                     sentiment = analyze_sentiment(news_data["content"])
                     news_data["sentiment"] = sentiment
 
                     if sentiment == "positive":
                         all_news.append(news_data)
-                        news_collection.insert_one(news_data)
 
                 except Exception as story_error:
                     print(f"Error processing story: {story_error}")
                     continue
+
         random.shuffle(all_news)
+        combined_news_content = (
+            "Welcome to HappyNest Radio, your daily dose of positivity and inspiration, "
+            "where we bring you the latest headlines to keep you informed and uplifted.\n\n"
+        )
+        for article in all_news:
+            combined_news_content +=  f"{article['title']}\n\n"  # Adding 'Headline:' for clarity and emphasis
+
+        combined_news_content += (
+            "That wraps up today's HappyNest Radio broadcast. "
+            "Thank you for tuning in, and remember to spread kindness and stay informed!"
+        )
+        speech_file_path = Path("audio") / "combined_news_audio.mp3"
+        os.makedirs("audio", exist_ok=True)
+
+        response = client2.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=combined_news_content
+        )
+
+        response.stream_to_file(speech_file_path)
+
+        audio_url = f"/audio/combined_news_audio.mp3"
+        print(audio_url)
 
         return all_news
 
