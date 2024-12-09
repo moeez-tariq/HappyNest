@@ -6,5 +6,4 @@ pydantic[email]
 uvicorn[standard]
 requests
 openai
-pyaudio
-wave
+Path

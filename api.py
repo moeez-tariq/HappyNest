@@ -16,8 +16,6 @@ import os
 import random
 import time
 import requests
-import pyaudio
-import wave
 from pprint import pprint
 
 # Load environment variables
