@@ -255,6 +255,7 @@ def analyze_sentiment(text: str) -> str:
     
     result = response.json()
     sentiment = result["choices"][0]["message"]["content"].strip().lower()
+    print(f"Sentiment: {sentiment}")
     # if sentiment == "positive" and is_political(text):
     #     return "neutral"
     
@@ -658,11 +659,14 @@ async def fetch_fresh_news(city: str, lat: Optional[float] = None, lon: Optional
                 if not existing_news:
                     sentiment = analyze_sentiment(news_data["content"])
                     news_data["sentiment"] = sentiment
+                    # print("Here")
 
                     # Add the news to 'checked_news'
                     checked_news_collection.insert_one(news_data)
+                    # print("Here")
 
                     if sentiment == "positive":
+                        print("Positive news found")
                         positive_news.append(news_data)
                         news_collection.insert_one(news_data)
                 
