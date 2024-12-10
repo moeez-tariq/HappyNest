@@ -219,9 +219,14 @@ def is_political(text: str) -> bool:
 def analyze_sentiment(text: str) -> str:
 
     messages = [
-        {"role": "system", "content": "You are a helpful assistant that performs sentiment analysis."},
-        {"role": "user", "content": f"Analyze the sentiment of this text and return just one word, 'positive' if it's happy or positive, else return 'negative' if it's sad or dangerous otherwise 'neutral':\n\n{text}"}
+        {"role": "system", "content": "You are a helpful assistant that performs sentiment analysis and categorizes text for specific purposes."},
+        {"role": "user", "content": f"""Analyze the sentiment of this text and return one word based on these conditions:
+        - Return 'happy' if the content is explicitly cheerful, uplifting, or positive.
+        - Return 'negative' if the content is sad, dangerous, or negative.
+        - Return 'political' if the content has a political context or mentions political figures, events, or ideologies.
+        - Return 'neutral' for content that does not evoke a clear emotional sentiment or does not meet the criteria for 'happy' or 'negative'. 
 
+        Text: {text}"""}
     ]
     
     data = {
@@ -245,8 +250,8 @@ def analyze_sentiment(text: str) -> str:
     
     result = response.json()
     sentiment = result["choices"][0]["message"]["content"].strip().lower()
-    if sentiment == "positive" and is_political(text):
-        return "neutral"
+    # if sentiment == "positive" and is_political(text):
+    #     return "neutral"
     
     return sentiment
 
