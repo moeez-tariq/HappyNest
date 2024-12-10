@@ -34,6 +34,7 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:8080",
+    "http://localhost:8000",
     "https://happynest-kappa.vercel.app"
 ]
 
@@ -726,5 +727,5 @@ async def get_leaderboard():
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))
+    port = int(os.getenv("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
