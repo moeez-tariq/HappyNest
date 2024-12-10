@@ -1,14 +1,13 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-from typing import Optional, Dict, List
-from datetime import datetime
+from typing import Optional, Dict, List, Any
+from datetime import datetime, timedelta
 from pathlib import Path
 from openai import OpenAI
 from difflib import SequenceMatcher
@@ -27,6 +26,7 @@ PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
 OPEN_AI_API_ENDPOINT = os.getenv("OPEN_AI_API_ENDPOINT")
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")  
+API_BASE_URL = os.getenv("API_BASE_URL")
 
 app = FastAPI()
 
@@ -40,7 +40,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -112,6 +112,11 @@ class GoodDeed(BaseModel):
     completed_at: Optional[datetime] = datetime.now()
     streak_continued: Optional[bool] = False
     replies: List[Reply] = []
+
+
+class NewsResponse(BaseModel):
+    news: List[NewsArticle]
+    audio: Any = None
 
 # Helper function to handle ObjectId conversion
 def str_to_objectid(id_str: str) -> ObjectId:
@@ -393,7 +398,83 @@ app.mount("/audio", StaticFiles(directory="audio"), name="audio")
 
 client2 = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
-@app.get("/api/news/", response_model=List[NewsArticle])
+@app.get("/api/news", response_model=NewsResponse)
+async def get_news():
+    try:
+        # Get all news from the database
+        
+        # Use MongoDB's aggregate to get a random sample of documents
+        # Using $sample to get random documents efficiently
+        pipeline = [
+            # First, we'll match only documents from the last 14 days to keep content fresh
+            {
+                "$match": {
+                    "published_at": {
+                        "$gte": datetime.utcnow() - timedelta(days=2)
+                    }
+                }
+            },
+            # Then get a random sample
+            {
+                "$sample": {
+                    "size": 20  # Get 202020 random articles, matching your previous count
+                }
+            }
+        ]
+        
+        news_cursor = news_collection.aggregate(pipeline)
+        all_news = list(news_cursor)
+        
+        if not all_news:
+            # If no recent news is found, just get any 8 random articles regardless of date
+            news_cursor = news_collection.aggregate([
+                {
+                    "$sample": {
+                        "size": 20
+                    }
+                }
+            ])
+            all_news = list(news_cursor)
+            
+        # Create the combined news content for audio
+        combined_news_content = (
+            "Welcome to HappyNest Radio, your daily dose of positivity and inspiration, "
+            "where we bring you the latest headlines to keep you informed and uplifted.\n\n"
+        )
+        
+        for article in all_news:
+            combined_news_content += f"{article['title']}\n\n"
+            
+        combined_news_content += (
+            "That wraps up today's HappyNest Radio broadcast. "
+            "Thank you for tuning in, and remember to spread kindness and stay informed!"
+        )
+        
+        # Generate audio file
+        speech_file_path = Path("audio") / "combined_news_audio.mp3"
+        # os.makedirs("audio", exist_ok=True)
+        
+        # response = client2.audio.speech.create(
+        #     model="tts-1",
+        #     voice="alloy",
+        #     input=combined_news_content
+        # )
+        # response.stream_to_file(speech_file_path)
+        print(f"{API_BASE_URL}{speech_file_path}")
+        
+        return {
+            "news": all_news,
+            "audio": f"{API_BASE_URL}{speech_file_path}"
+        }
+        
+    except Exception as e:
+        print(f"Get news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
+
+@app.get("/api/news/global-fetch", response_model=NewsResponse)
 async def fetch_news():
     try:
         # Collection to store checked news
@@ -409,7 +490,7 @@ async def fetch_news():
             "Jakarta", "Manila", "Kuala Lumpur", "Bangkok", "Ho Chi Minh City", "Istanbul"
         ]
         
-        selected_cities = random.sample(cities, k=4)
+        selected_cities = random.sample(cities, k=8)
         print(f"Fetching news for cities: {selected_cities}")
 
         all_news = []
@@ -494,10 +575,11 @@ async def fetch_news():
 
         response.stream_to_file(speech_file_path)
 
-        audio_url = f"/audio/combined_news_audio.mp3"
-        print(audio_url)
 
-        return all_news
+        return {
+            "news": all_news,
+            "audio": f"{API_BASE_URL}{speech_file_path}"
+        }
 
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
@@ -517,14 +599,11 @@ async def home(name:str):
             raise HTTPException(status_code=404, detail="News article not found")
     return {"data":news_articles}
 
-@app.get("/api/news/fetch", response_model=List[NewsArticle])
-async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
-    try:
-        # Collection to store checked news
-        checked_news_collection = db.get_collection("checked_news")
-
-        city = "New York"  # Default city
-        if lat is not None and lon is not None:
+async def get_city_from_coordinates(lat: Optional[float], lon: Optional[float]) -> str:
+    """Get city name from coordinates using OpenStreetMap."""
+    city = "New York"  # Default city
+    if lat is not None and lon is not None:
+        try:
             url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
             response = requests.get(url, headers={'User-Agent': 'YourApp/1.0'})
             data = response.json()
@@ -532,7 +611,13 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
                 city = data['address'].get('city') or data['address'].get('town') or data['address'].get('village')
                 if city and 'City of' in city:
                     city = city[8:]
-      
+        except Exception as e:
+            print(f"Error getting city from coordinates: {e}")
+    return city
+
+async def fetch_fresh_news(city: str, lat: Optional[float] = None, lon: Optional[float] = None) -> List[dict]:
+    """Fetch news from external API and store in database."""
+    try:
         headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
         params = {
             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
@@ -541,15 +626,15 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
             "sort_by": "published_at",
             "per_page": 100,
         }
-
         stories = get_top_stories(params, headers, 100)
         if not stories:
             return []
+            
         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
         positive_news = []
         
-        for story in deduplicated_stories:
-            try:   
+        for story in deduplicated_stories[:10]:  # Limit processing to first 10
+            try:
                 news_data = {
                     "title": story["title"],
                     "content": story["body"],
@@ -564,7 +649,7 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
                     },
                     "published_at": datetime.utcnow(),
                     "source": story["links"]["permalink"],
-                    "id": str(ObjectId())  # Generate a unique ID
+                    "id": str(ObjectId())
                 }
 
                 # Check if news already exists in 'checked_news'
@@ -590,47 +675,101 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
             except Exception as story_error:
                 print(f"Error processing story: {story_error}")
                 continue
-         
-       # Limit to 10 positive news headlines
-        positive_news = positive_news[:10]
+                
+        return positive_news
+    except Exception as e:
+        print(f"Error fetching fresh news: {str(e)}")
+        return []
 
+async def get_news_from_db(city: str) -> List[dict]:
+    """Get recent news from database for a specific city."""
+    pipeline = [
+        {
+            "$match": {
+                "location.city": city,
+                "published_at": {
+                    "$gte": datetime.utcnow() - timedelta(days=14)
+                },
+                "sentiment": "positive"
+            }
+        },
+        {
+            "$sort": {
+                "published_at": -1
+            }
+        },
+        {
+            "$limit": 10
+        }
+    ]
+    
+    news_cursor = news_collection.aggregate(pipeline)
+    return list(news_cursor)
+
+async def generate_audio_news(news_items: List[dict], city: str) -> str:
+    return f"{API_BASE_URL}audio/combined_news_audio.mp3"
+    """Generate audio file from news items and return the URL."""
+    try:
         combined_news_content = (
             "Welcome to HappyNest Local Radio, your source for uplifting news and positive updates in your area. "
             "Here are the latest heartwarming stories:\n\n"
         )
-
-        for article in positive_news:
+        for article in news_items:
             combined_news_content += f"{article['title']}\n\n"
-
-        # Final wrap-up message
+        
         combined_news_content += (
             "That concludes today's updates on HappyNest Local Radio. Stay positive, stay informed, and we'll be back soon with more good news!"
         )
-        # Path to save the generated audio file
+
         speech_file_path = Path("audio") / f"local_news_{city.replace(' ', '_')}.mp3"
         os.makedirs("audio", exist_ok=True)
-
-        # Generate speech using OpenAI TTS
+        
         response = client2.audio.speech.create(
             model="tts-1",
             voice="alloy",
             input=combined_news_content
         )
-
-        # Save the audio file to the defined path
         response.stream_to_file(speech_file_path)
-
-        # Return the audio file URL
-        audio_url = f"/audio/{speech_file_path.name}"
-        print(f"Audio file generated: {audio_url}")
         
-        return positive_news
+        return f"{API_BASE_URL}/audio/{speech_file_path.name}"
+    except Exception as e:
+        print(f"Error generating audio: {e}")
+        return ""
 
+@app.get("/api/news/fetch", response_model=NewsResponse)
+async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
+    try:
+        city = await get_city_from_coordinates(lat, lon)
+        positive_news = await fetch_fresh_news(city, lat, lon)
+        audio_url = await generate_audio_news(positive_news, city)
+        
+        return {
+            "news": positive_news,
+            "audio": audio_url
+        }
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"An error occurred while fetching news: {str(e)}"
+        )
+
+@app.get("/api/news/location", response_model=NewsResponse)
+async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = None):
+    try:
+        city = await get_city_from_coordinates(lat, lon)
+        positive_news = await get_news_from_db(city)
+        audio_url = await generate_audio_news(positive_news, city)
+        
+        return {
+            "news": positive_news,
+            "audio": audio_url
+        }
+    except Exception as e:
+        print(f"Location news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching location news: {str(e)}"
         )
 
 @app.get("/api/news/{article_id}", response_model=NewsArticle)
