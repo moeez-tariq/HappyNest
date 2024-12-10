@@ -396,6 +396,9 @@ client2 = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 @app.get("/api/news/", response_model=List[NewsArticle])
 async def fetch_news():
     try:
+        # Collection to store checked news
+        checked_news_collection = db.get_collection("checked_news")
+
         cities = [
             "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Boston", "Seattle",
             "London", "Paris", "Berlin", "Rome", "Madrid", "Barcelona", "Amsterdam", "Vienna", "Zurich",
@@ -446,11 +449,23 @@ async def fetch_news():
                         "id": str(ObjectId())
                     }
 
-                    sentiment = analyze_sentiment(news_data["content"])
-                    news_data["sentiment"] = sentiment
+                    # sentiment = analyze_sentiment(news_data["content"])
+                    # news_data["sentiment"] = sentiment
 
-                    if sentiment == "positive":
-                        all_news.append(news_data)
+                    # if sentiment == "positive":
+                    #     all_news.append(news_data)
+
+                    # Check if news already exists in 'checked_news'
+                    existing_news = checked_news_collection.find_one({"title": news_data["title"]})
+                    if not existing_news:
+                        sentiment = analyze_sentiment(news_data["content"])
+                        news_data["sentiment"] = sentiment
+
+                        # Add the news to 'checked_news'
+                        checked_news_collection.insert_one(news_data)
+
+                        if sentiment == "positive":
+                            all_news.append(news_data)
 
                 except Exception as story_error:
                     print(f"Error processing story: {story_error}")
@@ -505,6 +520,9 @@ async def home(name:str):
 @app.get("/api/news/fetch", response_model=List[NewsArticle])
 async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
     try:
+        # Collection to store checked news
+        checked_news_collection = db.get_collection("checked_news")
+
         city = "New York"  # Default city
         if lat is not None and lon is not None:
             url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
@@ -548,13 +566,26 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
                     "source": story["links"]["permalink"],
                     "id": str(ObjectId())  # Generate a unique ID
                 }
+
+                # Check if news already exists in 'checked_news'
+                existing_news = checked_news_collection.find_one({"title": news_data["title"]})
+                if not existing_news:
+                    sentiment = analyze_sentiment(news_data["content"])
+                    news_data["sentiment"] = sentiment
+
+                    # Add the news to 'checked_news'
+                    checked_news_collection.insert_one(news_data)
+
+                    if sentiment == "positive":
+                        positive_news.append(news_data)
+                        news_collection.insert_one(news_data)
                 
-                sentiment = analyze_sentiment(news_data["content"])
-                news_data["sentiment"] = sentiment
+                # sentiment = analyze_sentiment(news_data["content"])
+                # news_data["sentiment"] = sentiment
                 
-                if sentiment == "positive":
-                    positive_news.append(news_data)
-                    news_collection.insert_one(news_data)
+                # if sentiment == "positive":
+                #     positive_news.append(news_data)
+                #     news_collection.insert_one(news_data)
                     
             except Exception as story_error:
                 print(f"Error processing story: {story_error}")
