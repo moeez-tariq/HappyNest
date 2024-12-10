@@ -618,6 +618,7 @@ async def get_city_from_coordinates(lat: Optional[float], lon: Optional[float]) 
 async def fetch_fresh_news(city: str, lat: Optional[float] = None, lon: Optional[float] = None) -> List[dict]:
     """Fetch news from external API and store in database."""
     try:
+        checked_news_collection = db.get_collection("checked_news")
         headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
         params = {
             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
