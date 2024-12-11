@@ -1,3 +1,44 @@
+# HappyNest: Final Submission
+As of December 10th, 2024 we have deployed the most recent version of our app. HappyNest combines a number of innovative features that bring you global and local happy news and good deeds around the world. HappyNest is different from other sites like goodnewsnetwork because it allows for location specific news, something that other sites do not provide. One of our key insights was that people don't want to just hear about happy things, they want to know that there are happy things going on around them. Another key differentiator between other sites is that HappyNest provides HappyNest radio, an accessibility solution for the visually-impaired. Thirdly, HappyNest's Good Deeds features create a positive community of people helping each other and encouraging each other to do more good things through our leaderboard.
+
+Our application has an in-depth custom API that procures the data for our website. The meat of the application is handled in the /api/news routes in which there are 4 key routes to consider.
+- /api/news gets the top 80 global news articles from our database from the last week in randomly shuffled order (there can sometimes be a bias towards NYC since that is where most of our data comes from)
+- /api/news/global-fetch gets fresh global news from our external API, sourcing it from a list of random countries
+- /api/news/location gets the most recent 40 articles from your city, calculated based on your latitude and longitude
+- /api/news/fetch gets fresh local news from our external API
+
+Besides the /api/news routes, we also use /api/good-deeds, /api/replies and /api/users use the standard GET, POST, PUT, DELETE methods to make our good deeds functions work. There is also a /api/leaderboard API that combs through the database and counts the good deeds done by different people. Note that the Good Deed of the Day API is actually in the frontend and is handled by querying a list of ~365 good deeds and matching it to the current day of the year. Please enjoy our site!
+
+## How to Use
+### Prerequisites:
+- Clone and Navigate to the repository:
+  ```bash
+  git clone https://github.com/moeez-tariq/HappyNest
+  cd HappyNest
+  ```
+- Set up the environment and set up your `.env` file with the following content:
+  ```
+  MONGODB_URI=<your_val_here>
+  AYLIEN_USERNAME=<your_val_here>
+  AYLIEN_PASSWORD=<your_val_here>
+  AYLIEN_APP_ID=<your_val_here>
+  OPEN_AI_API_KEY=<your_val_here>
+  OPEN_AI_API_ENDPOINT=<your_val_here>
+  API_BASE_URL=<your_val_here>
+  ```
+- Set up your virtual environment and install required Python libraries:
+  ```bash
+  python3 -m venv .venv
+  source .venv/bin/activate
+  pip install -r requirements.txt
+  ```
+- Ensure MongoDB is running, either locally or on a cloud service like MongoDB Atlas.
+### Running the Application:
+- Run the main program:
+  ```bash
+  uvicorn api:app --reload
+  ```
+
 # HappyNest: Week 9
 We have implemented the first version of our app! Right now, the application is able to get news that is from your nearest city and display it to you.
 
