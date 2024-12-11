@@ -494,7 +494,7 @@ async def fetch_news_global():
         )
 
 
-@app.get("/api/news/", response_model=NewsResponse)
+@app.get("/api/news/", response_model=Any)
 async def fetch_news():
     try:
         # Calculate the date 14 days ago
@@ -538,7 +538,7 @@ async def fetch_news():
         )
 
 
-@app.get("/api/news/location", response_model=NewsResponse)
+@app.get("/api/news/location", response_model=Any)
 async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = None):
     try:
         city = "New York"  # Default city
