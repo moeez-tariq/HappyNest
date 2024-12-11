@@ -28,6 +28,7 @@ PASSWORD = os.getenv("AYLIEN_PASSWORD")
 APP_ID = os.getenv("AYLIEN_APP_ID")
 OPEN_AI_API_ENDPOINT = os.getenv("OPEN_AI_API_ENDPOINT")
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")  
+API_BASE_URL = os.getenv("API_BASE_URL")
 
 app = FastAPI()
 
@@ -112,6 +113,10 @@ class GoodDeed(BaseModel):
     completed_at: Optional[datetime] = datetime.now()
     streak_continued: Optional[bool] = False
     replies: List[Reply] = []
+
+class NewsResponse(BaseModel):
+    news: List[NewsArticle]
+    audio: Any = None
 
 # Helper function to handle ObjectId conversion
 def str_to_objectid(id_str: str) -> ObjectId:
@@ -388,7 +393,7 @@ app.mount("/audio", StaticFiles(directory="audio"), name="audio")
 
 client2 = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
-@app.get("/api/news/global-fetch", response_model=List[NewsArticle])
+@app.get("/api/news/global-fetch", response_model=NewsResponse)
 async def fetch_news_global():
     try:
         cities = [
@@ -474,10 +479,12 @@ async def fetch_news_global():
 
         response.stream_to_file(speech_file_path)
 
-        audio_url = f"/audio/combined_news_audio.mp3"
+        # audio_url = f"/audio/combined_news_audio.mp3"
+        audio_url = f"{API_BASE_URL}audio/{speech_file_path.name}"
         print(audio_url)
 
-        return all_news
+        # return all_news
+        return {"news": all_news, "audio": audio_url}
 
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
@@ -487,7 +494,7 @@ async def fetch_news_global():
         )
 
 
-@app.get("/api/news/", response_model=Any)
+@app.get("/api/news/", response_model=NewsResponse)
 async def fetch_news():
     try:
         # Calculate the date 14 days ago
@@ -520,7 +527,8 @@ async def fetch_news():
 
         random.shuffle(all_news)
 
-        return all_news
+        # return all_news
+        return {"news": all_news, "audio": ""}
 
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
@@ -530,7 +538,7 @@ async def fetch_news():
         )
 
 
-@app.get("/api/news/location", response_model=Any)
+@app.get("/api/news/location", response_model=NewsResponse)
 async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = None):
     try:
         city = "New York"  # Default city
@@ -575,7 +583,7 @@ async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = 
 
         random.shuffle(all_news)
 
-        return all_news
+        return {"news": all_news, "audio": ""}
     
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
@@ -584,8 +592,8 @@ async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = 
             detail=f"An error occurred while fetching news: {str(e)}"
         )
 
-@app.get("/api/news/fetch", response_model=List[NewsArticle])
-async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
+@app.get("/api/news/fetch", response_model=NewsResponse)
+async def fetch_news_coord(lat: Optional[float] = None, lon: Optional[float] = None):
     try:
         city = "New York"  # Default city
         if lat is not None and lon is not None:
@@ -628,7 +636,7 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
                     },
                     "published_at": datetime.utcnow(),
                     "source": story["links"]["permalink"],
-                    "id": str(ObjectId())  # Generate a unique ID
+                    "id": str(ObjectId())
                 }
                 
                 sentiment = analyze_sentiment(news_data["content"])
@@ -662,20 +670,21 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
         os.makedirs("audio", exist_ok=True)
 
         # Generate speech using OpenAI TTS
-        response = client2.audio.speech.create(
-            model="tts-1",
-            voice="alloy",
-            input=combined_news_content
-        )
+        # response = client2.audio.speech.create(
+        #     model="tts-1",
+        #     voice="alloy",
+        #     input=combined_news_content
+        # )
 
         # Save the audio file to the defined path
-        response.stream_to_file(speech_file_path)
+        # response.stream_to_file(speech_file_path)
 
         # Return the audio file URL
-        audio_url = f"/audio/{speech_file_path.name}"
+        audio_url = f"{API_BASE_URL}audio/{speech_file_path.name}"
         print(f"Audio file generated: {audio_url}")
         
-        return positive_news
+        return {"news": positive_news, "audio": audio_url}
+        # return positive_news
 
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
