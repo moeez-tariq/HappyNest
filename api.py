@@ -461,8 +461,8 @@ async def fetch_news_global():
             "Welcome to HappyNest Radio, your daily dose of positivity and inspiration, "
             "where we bring you the latest headlines to keep you informed and uplifted.\n\n"
         )
-        for article in all_news:
-            combined_news_content +=  f"{article['title']}\n\n"  # Adding 'Headline:' for clarity and emphasis
+        for article in all_news[10:]:
+            combined_news_content += f"In {article['location']['city']}: {article['title']}\n\n"
 
         combined_news_content += (
             "That wraps up today's HappyNest Radio broadcast. "
@@ -670,14 +670,14 @@ async def fetch_news_coord(lat: Optional[float] = None, lon: Optional[float] = N
         os.makedirs("audio", exist_ok=True)
 
         # Generate speech using OpenAI TTS
-        # response = client2.audio.speech.create(
-        #     model="tts-1",
-        #     voice="alloy",
-        #     input=combined_news_content
-        # )
+        response = client2.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=combined_news_content
+        )
 
         # Save the audio file to the defined path
-        # response.stream_to_file(speech_file_path)
+        response.stream_to_file(speech_file_path)
 
         # Return the audio file URL
         audio_url = f"{API_BASE_URL}audio/{speech_file_path.name}"
