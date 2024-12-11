@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from typing import Optional, Dict, List, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from openai import OpenAI
 from difflib import SequenceMatcher
@@ -16,6 +17,7 @@ import random
 import time
 import requests
 from pprint import pprint
+from datetime import datetime, timedelta
 
 # Load environment variables
 load_dotenv()
@@ -34,13 +36,12 @@ origins = [
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:8080",
-    "http://localhost:8000",
     "https://happynest-kappa.vercel.app"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -112,7 +113,6 @@ class GoodDeed(BaseModel):
     completed_at: Optional[datetime] = datetime.now()
     streak_continued: Optional[bool] = False
     replies: List[Reply] = []
-
 
 class NewsResponse(BaseModel):
     news: List[NewsArticle]
@@ -224,14 +224,9 @@ def is_political(text: str) -> bool:
 def analyze_sentiment(text: str) -> str:
 
     messages = [
-        {"role": "system", "content": "You are a helpful assistant that performs sentiment analysis and categorizes text for specific purposes."},
-        {"role": "user", "content": f"""Analyze the sentiment of this text and return one word based on these conditions:
-        - Return 'happy' if the content is explicitly cheerful, uplifting, or positive.
-        - Return 'negative' if the content is sad, dangerous, or negative.
-        - Return 'political' if the content has a political context or mentions political figures, events, or ideologies.
-        - Return 'neutral' for content that does not evoke a clear emotional sentiment or does not meet the criteria for 'happy' or 'negative'. 
+        {"role": "system", "content": "You are a helpful assistant that performs sentiment analysis."},
+        {"role": "user", "content": f"Analyze the sentiment of this text and return just one word, 'positive' if it's happy or positive, else return 'negative' if it's sad or dangerous otherwise 'neutral':\n\n{text}"}
 
-        Text: {text}"""}
     ]
     
     data = {
@@ -255,9 +250,8 @@ def analyze_sentiment(text: str) -> str:
     
     result = response.json()
     sentiment = result["choices"][0]["message"]["content"].strip().lower()
-    print(f"Sentiment: {sentiment}")
-    # if sentiment == "positive" and is_political(text):
-    #     return "neutral"
+    if sentiment == "positive" and is_political(text):
+        return "neutral"
     
     return sentiment
 
@@ -383,7 +377,7 @@ async def delete_good_deed(deed_id: str):
 async def create_news(news: NewsArticle):
     try:
         news_data = news.dict()
-        print(f"Received news data: {news.dict()}")
+        # print(f"Received news data: {news.dict()}")
         news_data["published_at"] = datetime.now()
         result = news_collection.insert_one(news_data)
         return {"id": str(result.inserted_id)}
@@ -399,88 +393,9 @@ app.mount("/audio", StaticFiles(directory="audio"), name="audio")
 
 client2 = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
-@app.get("/api/news", response_model=NewsResponse)
-async def get_news():
-    try:
-        # Get all news from the database
-        
-        # Use MongoDB's aggregate to get a random sample of documents
-        # Using $sample to get random documents efficiently
-        pipeline = [
-            # First, we'll match only documents from the last 14 days to keep content fresh
-            {
-                "$match": {
-                    "published_at": {
-                        "$gte": datetime.utcnow() - timedelta(days=2)
-                    }
-                }
-            },
-            # Then get a random sample
-            {
-                "$sample": {
-                    "size": 20  # Get 202020 random articles, matching your previous count
-                }
-            }
-        ]
-        
-        news_cursor = news_collection.aggregate(pipeline)
-        all_news = list(news_cursor)
-        
-        if not all_news:
-            # If no recent news is found, just get any 8 random articles regardless of date
-            news_cursor = news_collection.aggregate([
-                {
-                    "$sample": {
-                        "size": 20
-                    }
-                }
-            ])
-            all_news = list(news_cursor)
-            
-        # Create the combined news content for audio
-        combined_news_content = (
-            "Welcome to HappyNest Radio, your daily dose of positivity and inspiration, "
-            "where we bring you the latest headlines to keep you informed and uplifted.\n\n"
-        )
-        
-        for article in all_news:
-            combined_news_content += f"{article['title']}\n\n"
-            
-        combined_news_content += (
-            "That wraps up today's HappyNest Radio broadcast. "
-            "Thank you for tuning in, and remember to spread kindness and stay informed!"
-        )
-        
-        # Generate audio file
-        speech_file_path = Path("audio") / "combined_news_audio.mp3"
-        # os.makedirs("audio", exist_ok=True)
-        
-        # response = client2.audio.speech.create(
-        #     model="tts-1",
-        #     voice="alloy",
-        #     input=combined_news_content
-        # )
-        # response.stream_to_file(speech_file_path)
-        print(f"{API_BASE_URL}{speech_file_path}")
-        
-        return {
-            "news": all_news,
-            "audio": f"{API_BASE_URL}{speech_file_path}"
-        }
-        
-    except Exception as e:
-        print(f"Get news error: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"An error occurred while fetching news: {str(e)}"
-        )
-
 @app.get("/api/news/global-fetch", response_model=NewsResponse)
-async def fetch_news():
+async def fetch_news_global():
     try:
-        # Collection to store checked news
-        checked_news_collection = db.get_collection("checked_news")
-
         cities = [
             "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Boston", "Seattle",
             "London", "Paris", "Berlin", "Rome", "Madrid", "Barcelona", "Amsterdam", "Vienna", "Zurich",
@@ -491,7 +406,7 @@ async def fetch_news():
             "Jakarta", "Manila", "Kuala Lumpur", "Bangkok", "Ho Chi Minh City", "Istanbul"
         ]
         
-        selected_cities = random.sample(cities, k=8)
+        selected_cities = random.sample(cities, k=4)
         print(f"Fetching news for cities: {selected_cities}")
 
         all_news = []
@@ -531,26 +446,14 @@ async def fetch_news():
                         "id": str(ObjectId())
                     }
 
-                    # sentiment = analyze_sentiment(news_data["content"])
-                    # news_data["sentiment"] = sentiment
+                    sentiment = analyze_sentiment(news_data["content"])
+                    news_data["sentiment"] = sentiment
 
-                    # if sentiment == "positive":
-                    #     all_news.append(news_data)
-
-                    # Check if news already exists in 'checked_news'
-                    existing_news = checked_news_collection.find_one({"title": news_data["title"]})
-                    if not existing_news:
-                        sentiment = analyze_sentiment(news_data["content"])
-                        news_data["sentiment"] = sentiment
-
-                        # Add the news to 'checked_news'
-                        checked_news_collection.insert_one(news_data)
-
-                        if sentiment == "positive":
-                            all_news.append(news_data)
+                    if sentiment == "positive":
+                        all_news.append(news_data)
 
                 except Exception as story_error:
-                    print(f"Error processing story: {story_error}")
+                    # print(f"Error processing story: {story_error}")
                     continue
 
         random.shuffle(all_news)
@@ -576,11 +479,12 @@ async def fetch_news():
 
         response.stream_to_file(speech_file_path)
 
+        # audio_url = f"/audio/combined_news_audio.mp3"
+        audio_url = f"{API_BASE_URL}audio/{speech_file_path.name}"
+        print(audio_url)
 
-        return {
-            "news": all_news,
-            "audio": f"{API_BASE_URL}{speech_file_path}"
-        }
+        # return all_news
+        return {"news": all_news, "audio": audio_url}
 
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
@@ -589,22 +493,56 @@ async def fetch_news():
             detail=f"An error occurred while fetching news: {str(e)}"
         )
 
-@app.get("/api/news/city={name}")
-async def home(name:str):
-    news_articles = list(news_collection.find({"location.city": name}))
-    for news_article in news_articles:
-        if news_article:
-            news_article["id"] = str(news_article["_id"])
-            del news_article["_id"]
-        else:
-            raise HTTPException(status_code=404, detail="News article not found")
-    return {"data":news_articles}
 
-async def get_city_from_coordinates(lat: Optional[float], lon: Optional[float]) -> str:
-    """Get city name from coordinates using OpenStreetMap."""
-    city = "New York"  # Default city
-    if lat is not None and lon is not None:
-        try:
+@app.get("/api/news/", response_model=Any)
+async def fetch_news():
+    try:
+        # Calculate the date 14 days ago
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+
+        # Query the database for news articles published within the last 14 days
+        news_articles = news_collection.find({"published_at": {"$gte": seven_days_ago}}).sort("published_at", -1)
+        all_news = []
+        
+        # Convert MongoDB cursor to a list of dictionaries
+        for article in news_articles:
+            news_data = {
+                        "title": article["title"],
+                        "content": article["content"],
+                        "location": {
+                            "city": article["location"]["city"],
+                            "state": "Unknown",
+                            "country": "Unknown",
+                            "coordinates": {
+                                "latitude": 0,
+                                "longitude": 0
+                            }
+                        },
+                        "published_at": article["published_at"],
+                        "source": article["source"],
+                        "id": str(ObjectId())
+                    }
+            all_news.append(news_data)
+        all_news = all_news[:40]
+
+        random.shuffle(all_news)
+
+        # return all_news
+        return {"news": all_news, "audio": ""}
+
+    except Exception as e:
+        print(f"Fetch news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
+
+
+@app.get("/api/news/location", response_model=Any)
+async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = None):
+    try:
+        city = "New York"  # Default city
+        if lat is not None and lon is not None:
             url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
             response = requests.get(url, headers={'User-Agent': 'YourApp/1.0'})
             data = response.json()
@@ -612,31 +550,78 @@ async def get_city_from_coordinates(lat: Optional[float], lon: Optional[float]) 
                 city = data['address'].get('city') or data['address'].get('town') or data['address'].get('village')
                 if city and 'City of' in city:
                     city = city[8:]
-        except Exception as e:
-            print(f"Error getting city from coordinates: {e}")
-    return city
 
-async def fetch_fresh_news(city: str, lat: Optional[float] = None, lon: Optional[float] = None) -> List[dict]:
-    """Fetch news from external API and store in database."""
+        # Calculate the date 14 days ago
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+
+        # Query the database for news articles published within the last 14 days and by city
+        news_articles = news_collection.find({"published_at": {"$gte": seven_days_ago}, "location.city": city}).sort("published_at", -1)
+        all_news = []
+        
+        # Convert MongoDB cursor to a list of dictionaries
+        for article in news_articles:
+            news_data = {
+                        "title": article["title"],
+                        "content": article["content"],
+                        "location": {
+                            "city": article["location"]["city"],
+                            "state": "Unknown",
+                            "country": "Unknown",
+                            "coordinates": {
+                                "latitude": 0,
+                                "longitude": 0
+                            }
+                        },
+                        "published_at": article["published_at"],
+                        "source": article["source"],
+                        "id": str(ObjectId())
+                    }
+            all_news.append(news_data)
+
+        # first 40
+        all_news = all_news[:40]
+
+        random.shuffle(all_news)
+
+        return {"news": all_news, "audio": ""}
+    
+    except Exception as e:
+        print(f"Fetch news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
+
+@app.get("/api/news/fetch", response_model=NewsResponse)
+async def fetch_news_coord(lat: Optional[float] = None, lon: Optional[float] = None):
     try:
-        checked_news_collection = db.get_collection("checked_news")
+        city = "New York"  # Default city
+        if lat is not None and lon is not None:
+            url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
+            response = requests.get(url, headers={'User-Agent': 'YourApp/1.0'})
+            data = response.json()
+            if 'address' in data:
+                city = data['address'].get('city') or data['address'].get('town') or data['address'].get('village')
+                if city and 'City of' in city:
+                    city = city[8:]
+      
         headers = get_auth_header(USERNAME, PASSWORD, APP_ID)
         params = {
             "published_at": "[NOW-14DAYS/HOUR TO NOW/HOUR]",
             "language": "(en)",
             "entities": '{{element:title AND surface_forms:"' + city + '" AND type:("Location", "City")}}',
             "sort_by": "published_at",
-            "per_page": 100,
+            "per_page": 20,
         }
-        stories = get_top_stories(params, headers, 100)
+
+        stories = get_top_stories(params, headers, 20)
         if not stories:
             return []
-            
         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
         positive_news = []
         
-        for story in deduplicated_stories[:10]:  # Limit processing to first 10
-            try:
+        for story in deduplicated_stories:
+            try:   
                 news_data = {
                     "title": story["title"],
                     "content": story["body"],
@@ -653,129 +638,67 @@ async def fetch_fresh_news(city: str, lat: Optional[float] = None, lon: Optional
                     "source": story["links"]["permalink"],
                     "id": str(ObjectId())
                 }
-
-                # Check if news already exists in 'checked_news'
-                existing_news = checked_news_collection.find_one({"title": news_data["title"]})
-                if not existing_news:
-                    sentiment = analyze_sentiment(news_data["content"])
-                    news_data["sentiment"] = sentiment
-                    # print("Here")
-
-                    # Add the news to 'checked_news'
-                    checked_news_collection.insert_one(news_data)
-                    # print("Here")
-
-                    if sentiment == "positive":
-                        print("Positive news found")
-                        positive_news.append(news_data)
-                        news_collection.insert_one(news_data)
                 
-                # sentiment = analyze_sentiment(news_data["content"])
-                # news_data["sentiment"] = sentiment
+                sentiment = analyze_sentiment(news_data["content"])
+                news_data["sentiment"] = sentiment
                 
-                # if sentiment == "positive":
-                #     positive_news.append(news_data)
-                #     news_collection.insert_one(news_data)
+                if sentiment == "positive":
+                    positive_news.append(news_data)
+                    news_collection.insert_one(news_data)
                     
             except Exception as story_error:
                 print(f"Error processing story: {story_error}")
                 continue
-                
-        return positive_news
-    except Exception as e:
-        print(f"Error fetching fresh news: {str(e)}")
-        return []
+         
+       # Limit to 10 positive news headlines
+        positive_news = positive_news[:10]
 
-async def get_news_from_db(city: str) -> List[dict]:
-    """Get recent news from database for a specific city."""
-    pipeline = [
-        {
-            "$match": {
-                "location.city": city,
-                "published_at": {
-                    "$gte": datetime.utcnow() - timedelta(days=14)
-                },
-                "sentiment": "positive"
-            }
-        },
-        {
-            "$sort": {
-                "published_at": -1
-            }
-        },
-        {
-            "$limit": 10
-        }
-    ]
-    
-    news_cursor = news_collection.aggregate(pipeline)
-    return list(news_cursor)
-
-async def generate_audio_news(news_items: List[dict], city: str) -> str:
-    return f"{API_BASE_URL}audio/combined_news_audio.mp3"
-    """Generate audio file from news items and return the URL."""
-    try:
         combined_news_content = (
             "Welcome to HappyNest Local Radio, your source for uplifting news and positive updates in your area. "
             "Here are the latest heartwarming stories:\n\n"
         )
-        for article in news_items:
+
+        for article in positive_news:
             combined_news_content += f"{article['title']}\n\n"
-        
+
+        # Final wrap-up message
         combined_news_content += (
             "That concludes today's updates on HappyNest Local Radio. Stay positive, stay informed, and we'll be back soon with more good news!"
         )
-
+        # Path to save the generated audio file
         speech_file_path = Path("audio") / f"local_news_{city.replace(' ', '_')}.mp3"
         os.makedirs("audio", exist_ok=True)
-        
-        response = client2.audio.speech.create(
-            model="tts-1",
-            voice="alloy",
-            input=combined_news_content
-        )
-        response.stream_to_file(speech_file_path)
-        
-        return f"{API_BASE_URL}/audio/{speech_file_path.name}"
-    except Exception as e:
-        print(f"Error generating audio: {e}")
-        return ""
 
-@app.get("/api/news/fetch", response_model=NewsResponse)
-async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
-    try:
-        city = await get_city_from_coordinates(lat, lon)
-        positive_news = await fetch_fresh_news(city, lat, lon)
-        audio_url = await generate_audio_news(positive_news, city)
+        # Generate speech using OpenAI TTS
+        # response = client2.audio.speech.create(
+        #     model="tts-1",
+        #     voice="alloy",
+        #     input=combined_news_content
+        # )
+
+        # Save the audio file to the defined path
+        # response.stream_to_file(speech_file_path)
+
+        # Return the audio file URL
+        audio_url = f"{API_BASE_URL}audio/{speech_file_path.name}"
+        print(f"Audio file generated: {audio_url}")
         
-        return {
-            "news": positive_news,
-            "audio": audio_url
-        }
+        return {"news": positive_news, "audio": audio_url}
+        # return positive_news
+
     except Exception as e:
         print(f"Fetch news error: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail=f"An error occurred while fetching news: {str(e)}"
         )
+    
 
-@app.get("/api/news/location", response_model=NewsResponse)
-async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = None):
-    try:
-        city = await get_city_from_coordinates(lat, lon)
-        positive_news = await get_news_from_db(city)
-        audio_url = await generate_audio_news(positive_news, city)
-        
-        return {
-            "news": positive_news,
-            "audio": audio_url
-        }
-    except Exception as e:
-        print(f"Location news error: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"An error occurred while fetching location news: {str(e)}"
-        )
+
+
+
+
+
 
 @app.get("/api/news/{article_id}", response_model=NewsArticle)
 async def get_news_article(article_id: str):
