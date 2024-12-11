@@ -523,7 +523,7 @@ async def fetch_news():
                         "id": str(ObjectId())
                     }
             all_news.append(news_data)
-        all_news = all_news[:40]
+        all_news = all_news[:80]
 
         random.shuffle(all_news)
 
@@ -611,10 +611,10 @@ async def fetch_news_coord(lat: Optional[float] = None, lon: Optional[float] = N
             "language": "(en)",
             "entities": '{{element:title AND surface_forms:"' + city + '" AND type:("Location", "City")}}',
             "sort_by": "published_at",
-            "per_page": 20,
+            "per_page": 80,
         }
 
-        stories = get_top_stories(params, headers, 20)
+        stories = get_top_stories(params, headers, 80)
         if not stories:
             return []
         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
@@ -650,16 +650,16 @@ async def fetch_news_coord(lat: Optional[float] = None, lon: Optional[float] = N
                 print(f"Error processing story: {story_error}")
                 continue
          
-       # Limit to 10 positive news headlines
-        positive_news = positive_news[:10]
+        positive_news
 
         combined_news_content = (
             "Welcome to HappyNest Local Radio, your source for uplifting news and positive updates in your area. "
             "Here are the latest heartwarming stories:\n\n"
         )
 
-        for article in positive_news:
-            combined_news_content += f"{article['title']}\n\n"
+       # Limit to 10 positive news headlines for the TTS
+        for article in positive_news[:10]:
+            combined_news_content += f"In {article['location']['city']}: {article['title']}\n\n"
 
         # Final wrap-up message
         combined_news_content += (
