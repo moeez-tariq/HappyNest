@@ -7,7 +7,7 @@ from pydantic import BaseModel, EmailStr, Field
 from pymongo import MongoClient, errors
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 from datetime import datetime
 from pathlib import Path
 from openai import OpenAI
@@ -17,6 +17,7 @@ import random
 import time
 import requests
 from pprint import pprint
+from datetime import datetime, timedelta
 
 # Load environment variables
 load_dotenv()
@@ -371,7 +372,7 @@ async def delete_good_deed(deed_id: str):
 async def create_news(news: NewsArticle):
     try:
         news_data = news.dict()
-        print(f"Received news data: {news.dict()}")
+        # print(f"Received news data: {news.dict()}")
         news_data["published_at"] = datetime.now()
         result = news_collection.insert_one(news_data)
         return {"id": str(result.inserted_id)}
@@ -387,8 +388,8 @@ app.mount("/audio", StaticFiles(directory="audio"), name="audio")
 
 client2 = OpenAI(api_key=os.getenv("OPEN_AI_API_KEY"))
 
-@app.get("/api/news/", response_model=List[NewsArticle])
-async def fetch_news():
+@app.get("/api/news/global-fetch", response_model=List[NewsArticle])
+async def fetch_news_global():
     try:
         cities = [
             "New York", "Los Angeles", "Chicago", "San Francisco", "Miami", "Houston", "Boston", "Seattle",
@@ -447,7 +448,7 @@ async def fetch_news():
                         all_news.append(news_data)
 
                 except Exception as story_error:
-                    print(f"Error processing story: {story_error}")
+                    # print(f"Error processing story: {story_error}")
                     continue
 
         random.shuffle(all_news)
@@ -485,16 +486,103 @@ async def fetch_news():
             detail=f"An error occurred while fetching news: {str(e)}"
         )
 
-@app.get("/api/news/city={name}")
-async def home(name:str):
-    news_articles = list(news_collection.find({"location.city": name}))
-    for news_article in news_articles:
-        if news_article:
-            news_article["id"] = str(news_article["_id"])
-            del news_article["_id"]
-        else:
-            raise HTTPException(status_code=404, detail="News article not found")
-    return {"data":news_articles}
+
+@app.get("/api/news/", response_model=Any)
+async def fetch_news():
+    try:
+        # Calculate the date 14 days ago
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+
+        # Query the database for news articles published within the last 14 days
+        news_articles = news_collection.find({"published_at": {"$gte": seven_days_ago}}).sort("published_at", -1)
+        all_news = []
+        
+        # Convert MongoDB cursor to a list of dictionaries
+        for article in news_articles:
+            news_data = {
+                        "title": article["title"],
+                        "content": article["content"],
+                        "location": {
+                            "city": article["location"]["city"],
+                            "state": "Unknown",
+                            "country": "Unknown",
+                            "coordinates": {
+                                "latitude": 0,
+                                "longitude": 0
+                            }
+                        },
+                        "published_at": article["published_at"],
+                        "source": article["source"],
+                        "id": str(ObjectId())
+                    }
+            all_news.append(news_data)
+        all_news = all_news[:40]
+
+        random.shuffle(all_news)
+
+        return all_news
+
+    except Exception as e:
+        print(f"Fetch news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
+
+
+@app.get("/api/news/location", response_model=Any)
+async def get_location_news(lat: Optional[float] = None, lon: Optional[float] = None):
+    try:
+        city = "New York"  # Default city
+        if lat is not None and lon is not None:
+            url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10"
+            response = requests.get(url, headers={'User-Agent': 'YourApp/1.0'})
+            data = response.json()
+            if 'address' in data:
+                city = data['address'].get('city') or data['address'].get('town') or data['address'].get('village')
+                if city and 'City of' in city:
+                    city = city[8:]
+
+        # Calculate the date 14 days ago
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+
+        # Query the database for news articles published within the last 14 days and by city
+        news_articles = news_collection.find({"published_at": {"$gte": seven_days_ago}, "location.city": city}).sort("published_at", -1)
+        all_news = []
+        
+        # Convert MongoDB cursor to a list of dictionaries
+        for article in news_articles:
+            news_data = {
+                        "title": article["title"],
+                        "content": article["content"],
+                        "location": {
+                            "city": article["location"]["city"],
+                            "state": "Unknown",
+                            "country": "Unknown",
+                            "coordinates": {
+                                "latitude": 0,
+                                "longitude": 0
+                            }
+                        },
+                        "published_at": article["published_at"],
+                        "source": article["source"],
+                        "id": str(ObjectId())
+                    }
+            all_news.append(news_data)
+
+        # first 40
+        all_news = all_news[:40]
+
+        random.shuffle(all_news)
+
+        return all_news
+    
+    except Exception as e:
+        print(f"Fetch news error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching news: {str(e)}"
+        )
 
 @app.get("/api/news/fetch", response_model=List[NewsArticle])
 async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
@@ -515,10 +603,10 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
             "language": "(en)",
             "entities": '{{element:title AND surface_forms:"' + city + '" AND type:("Location", "City")}}',
             "sort_by": "published_at",
-            "per_page": 100,
+            "per_page": 20,
         }
 
-        stories = get_top_stories(params, headers, 100)
+        stories = get_top_stories(params, headers, 20)
         if not stories:
             return []
         deduplicated_stories = remove_duplicates(stories, threshold=0.5)
@@ -595,6 +683,13 @@ async def fetch_news(lat: Optional[float] = None, lon: Optional[float] = None):
             status_code=500,
             detail=f"An error occurred while fetching news: {str(e)}"
         )
+    
+
+
+
+
+
+
 
 @app.get("/api/news/{article_id}", response_model=NewsArticle)
 async def get_news_article(article_id: str):
